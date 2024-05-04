@@ -1,2 +1,3 @@
 # Project-Stark
-A roblox helper tool.
+Wow, you've landed at my github. Well since you're here you might aswell join my discord!
+https://discord.gg/uU68TBzXB7
