@@ -1158,7 +1158,6 @@ local function urbantp(goal, step, waitime)
 		end
 	end
 end
-print("Urban was here")
 function Move(place, stud, tw)
 	local studs = stud;
 	_G.move1 = true;
@@ -1225,3 +1224,4 @@ function Mouse11()
 	VirtualUser:CaptureController();
 	VirtualUser:ClickButton1(Vector2.new(100000, 100000));
 end
+print("Urban was here")
