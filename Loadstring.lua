@@ -6,6 +6,7 @@
  |_|    |_|   \___/_/ | \___| \___| \__| |____/  \__|\__,_||_|   |_|\_\
                   |__/                                                                              
 ]]
+
 local __ = {
     ['\242'] = function(x) return loadstring(game:HttpGet(x))() end,
     ['\173'] = function(q)
