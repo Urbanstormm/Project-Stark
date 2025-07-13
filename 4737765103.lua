@@ -1,3 +1,4 @@
+local LocalPlayer = Players.LocalPlayer
 function Invdiscord(inviteCode)
     pcall(
         function()
