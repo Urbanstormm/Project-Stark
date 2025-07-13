@@ -32,5 +32,4 @@ end
 Invdiscord("hAsH4bQ6YG")
 LocalPlayer:Kick("❌Script not released yet\njoin the discord for updates\nhttps://discord.gg/hAsH4bQ6YG")
 setclipboard("https://discord.gg/hAsH4bQ6Y")
-
 warn("-SN")
