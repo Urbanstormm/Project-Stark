@@ -94,6 +94,11 @@
       border-radius: 4px;
     }
 
+    /* Fix the scrollbar corner white box */
+    pre.codebox::-webkit-scrollbar-corner {
+      background: #1a1a1d;
+    }
+
     .copy-btn {
       background: var(--accent);
       border: none;
@@ -131,7 +136,7 @@
 </head>
 <body>
   <div class="container">
-    <a href="https://Urbanstorm.uk" class="title" target="_blank" rel="noopener noreferrer">Project Stark</a>
+    <a href="https://Urbanstorm.uk" class="title">Project Stark</a>
 
     <pre class="codebox"><code class="language-lua" id="code">
 --[[
