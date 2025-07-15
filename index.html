@@ -3,14 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Key System</title>
-  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;600&display=swap" rel="stylesheet"/>
+  <title>Project Stark</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
     :root {
-      --accent: #a855f7; /* Purple */
-      --bg-dark: #0f0f10;
-      --glass-bg: rgba(255, 255, 255, 0.06);
-      --glass-border: rgba(255, 255, 255, 0.15);
+      --accent: #a855f7;
+      --accent-hover: #9333ea;
+      --text-main: #ffffff;
+      --text-subtle: #cfcfcf;
+      --bg-dark: #0e0e11;
+      --glass: rgba(255, 255, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.12);
+      --shadow: rgba(0, 0, 0, 0.45);
     }
 
     * {
@@ -19,98 +23,104 @@
       padding: 0;
     }
 
-    body {
-      font-family: 'SF Pro Display', sans-serif;
+    html, body {
+      height: 100%;
       background: var(--bg-dark);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       display: flex;
-      justify-content: center;
       align-items: center;
-      min-height: 100vh;
+      justify-content: center;
+      color: var(--text-main);
       overflow: hidden;
-      color: white;
     }
 
     .card {
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      backdrop-filter: blur(30px);
-      -webkit-backdrop-filter: blur(30px);
-      padding: 50px 40px;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
       border-radius: 28px;
+      box-shadow: 0 40px 80px var(--shadow);
+      padding: 50px 40px;
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
       text-align: center;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-      animation: fadeIn 1.4s ease;
+      animation: popIn 1.2s ease;
     }
 
     .card h1 {
-      font-size: 2rem;
-      margin-bottom: 16px;
+      font-size: 2.2rem;
       font-weight: 600;
-      color: white;
+      margin-bottom: 16px;
     }
 
     .card p {
+      color: var(--text-subtle);
       font-size: 1rem;
-      margin-bottom: 30px;
-      color: #cfcfcf;
+      margin-bottom: 36px;
     }
 
     .btn {
       display: block;
       width: 100%;
-      padding: 15px;
-      margin-bottom: 15px;
-      background: var(--accent);
-      border: none;
-      border-radius: 12px;
-      color: white;
-      font-weight: 600;
+      padding: 16px;
+      margin-bottom: 18px;
       font-size: 1rem;
-      transition: all 0.25s ease;
+      font-weight: 600;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 14px;
       cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 0 0 transparent;
     }
 
     .btn:hover {
-      background: #9333ea;
-      transform: scale(1.03);
+      background: var(--accent-hover);
+      transform: translateY(-1px) scale(1.02);
+      box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
     }
 
     .footer {
-      margin-top: 25px;
+      margin-top: 30px;
       font-size: 0.85rem;
-      color: #888;
+      color: #777;
     }
 
-    @keyframes fadeIn {
+    @keyframes popIn {
       from {
         opacity: 0;
-        transform: translateY(40px);
+        transform: scale(0.95) translateY(20px);
       }
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: scale(1) translateY(0);
       }
     }
 
     @media (max-width: 480px) {
       .card {
-        padding: 35px 20px;
+        padding: 35px 24px;
       }
+    }
+
+    ::selection {
+      background: var(--accent);
+      color: black;
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>Welcome to the Key Hub</h1>
-    <p>Secure your access below</p>
-    
+    <h1>Welcome to Project Stark</h1>
+    <p>Sleek key system. Premium access. Built like a Mac.</p>
+
     <button class="btn" onclick="window.open('https://discord.gg/hAsH4bQ6YG', '_blank')">Join Discord</button>
-    <button class="btn" onclick="window.location.href='https://yourgithub.github.io/loadstring'">Get Loadstring</button>
-    <button class="btn" onclick="window.location.href='https://yourgithub.github.io/keypage'">Get Key</button>
-    
-    <div class="footer">© 2025 Project Stark.</div>
+    <button class="btn" onclick="window.location.href='pages/loadstring.html'">Get Loadstring</button>
+    <button class="btn" onclick="window.location.href='pages/keypage.html'">Get Key</button>
+
+    <div class="footer">© 2025 Project Stark. Elegance in access.</div>
   </div>
 </body>
 </html>
