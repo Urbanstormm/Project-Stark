@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Loadstring</title>
+  <title>Project Stark</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
     :root {
       --accent: #a855f7;
       --accent-hover: #9333ea;
+      --text-main: #ffffff;
+      --text-subtle: #cfcfcf;
       --bg-dark: #0e0e11;
       --glass: rgba(255, 255, 255, 0.06);
       --border: rgba(255, 255, 255, 0.12);
-      --keyword: #c084fc;
-      --string: #a78bfa;
-      --comment: #7c7c7c;
+      --shadow: rgba(0, 0, 0, 0.45);
     }
 
     * {
@@ -24,131 +24,103 @@
     }
 
     html, body {
+      height: 100%;
       background: var(--bg-dark);
-      font-family: 'Inter', sans-serif;
-      color: white;
-      min-height: 100vh;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 40px 20px;
+      color: var(--text-main);
+      overflow: hidden;
     }
 
-    .container {
+    .card {
       background: var(--glass);
       border: 1px solid var(--border);
       backdrop-filter: blur(25px);
       -webkit-backdrop-filter: blur(25px);
-      border-radius: 22px;
-      max-width: 700px;
+      border-radius: 28px;
+      box-shadow: 0 40px 80px var(--shadow);
+      padding: 50px 40px;
       width: 100%;
-      padding: 40px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
-      animation: fadeIn 1s ease;
-    }
-
-    .title {
-      display: block;
+      max-width: 420px;
       text-align: center;
-      font-size: 1.8rem;
+      animation: popIn 1.2s ease;
+    }
+
+    .card h1 {
+      font-size: 2.2rem;
       font-weight: 600;
-      margin-bottom: 24px;
-      color: var(--accent);
-      text-decoration: none;
-      transition: opacity 0.2s ease;
-      cursor: pointer;
+      margin-bottom: 16px;
     }
 
-    .title:hover {
-      opacity: 0.8;
-    }
-
-    .codebox {
-      position: relative;
-      background: #1a1a1d;
-      border-radius: 14px;
-      padding: 20px;
-      font-family: monospace;
-      font-size: 0.95rem;
-      line-height: 1.6;
-      color: white;
-      overflow-x: auto;
-      white-space: pre;
-      margin-bottom: 20px;
-    }
-
-    /* Dark Scrollbar Styling (Webkit Browsers) */
-    .codebox::-webkit-scrollbar {
-      height: 8px;
-    }
-
-    .codebox::-webkit-scrollbar-track {
-      background: #111;
-      border-radius: 4px;
-    }
-
-    .codebox::-webkit-scrollbar-thumb {
-      background: var(--accent);
-      border-radius: 4px;
-    }
-
-    .codebox .keyword { color: var(--keyword); }
-    .codebox .string  { color: var(--string); }
-    .codebox .comment { color: var(--comment); font-style: italic; }
-
-    .copy-btn {
-      background: var(--accent);
-      border: none;
-      color: white;
-      padding: 12px 18px;
-      border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
+    .card p {
+      color: var(--text-subtle);
       font-size: 1rem;
-      transition: all 0.2s ease;
+      margin-bottom: 36px;
     }
 
-    .copy-btn:hover {
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      margin-bottom: 18px;
+      font-size: 1rem;
+      font-weight: 600;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 0 0 transparent;
+    }
+
+    .btn:hover {
       background: var(--accent-hover);
-      transform: scale(1.02);
-      box-shadow: 0 4px 18px rgba(168, 85, 247, 0.3);
+      transform: translateY(-1px) scale(1.02);
+      box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
     }
 
-    @keyframes fadeIn {
+    .footer {
+      margin-top: 30px;
+      font-size: 0.85rem;
+      color: #777;
+    }
+
+    @keyframes popIn {
       from {
         opacity: 0;
-        transform: translateY(30px);
+        transform: scale(0.95) translateY(20px);
       }
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: scale(1) translateY(0);
       }
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 35px 24px;
+      }
+    }
+
+    ::selection {
+      background: var(--accent);
+      color: black;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <a href="../index.html" class="title">Welcome to Project Stark</a>
+  <div class="card">
+    <h1>Welcome to Project Stark</h1>
+    <p>Sleek Hub. Premium access but free. Built like a Mac.</p>
 
-    <div class="codebox" id="code">
-<span class="comment">-- Auto Farm Script</span>
-<span class="keyword">loadstring</span>(<span class="string">"game:HttpGet('https://yourgithub.github.io/script.lua')"</span>)()
-    </div>
+    <button class="btn" onclick="window.open('https://discord.gg/hAsH4bQ6YG', '_blank')">Join Discord</button>
+    <button class="btn" onclick="window.location.href='02/loadstring.html'">Get Loadstring</button>
+    <button class="btn" onclick="window.location.href='02/keypage.html'">Get Key</button>
 
-    <button class="copy-btn" onclick="copyCode()">Copy Loadstring</button>
+    <div class="footer">© 2025 Project Stark. Elegance in access.</div>
   </div>
-
-  <script>
-    function copyCode() {
-      const codeElement = document.getElementById('code');
-      const text = codeElement.textContent;
-      navigator.clipboard.writeText(text).then(() => {
-        const btn = document.querySelector('.copy-btn');
-        btn.textContent = 'Copied!';
-        setTimeout(() => btn.textContent = 'Copy Loadstring', 2000);
-      });
-    }
-  </script>
 </body>
 </html>
