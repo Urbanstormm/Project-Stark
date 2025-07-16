@@ -31,10 +31,7 @@
       font-family: 'Inter', sans-serif;
       color: white;
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
+      padding: 20px;
     }
 
     .container {
@@ -43,19 +40,20 @@
       backdrop-filter: blur(25px);
       -webkit-backdrop-filter: blur(25px);
       border-radius: 22px;
-      max-width: 800px;
-      width: 100%;
-      padding: 40px;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 24px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
-      animation: fadeIn 1s ease;
+      animation: fadeIn 0.8s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
     }
 
     .title {
-      display: block;
       text-align: center;
       font-size: 1.8rem;
       font-weight: 600;
-      margin-bottom: 24px;
       color: var(--accent);
       text-decoration: none;
       transition: opacity 0.2s ease;
@@ -75,11 +73,12 @@
       line-height: 1.5;
       color: white;
       overflow-x: auto;
-      max-height: 500px;
-      margin-bottom: 20px;
+      overflow-y: auto;
+      max-height: 400px;
+      white-space: pre;
     }
 
-    /* Dark Scrollbar */
+    /* Scrollbar styling */
     pre.codebox::-webkit-scrollbar {
       height: 8px;
       width: 8px;
@@ -94,7 +93,6 @@
       border-radius: 4px;
     }
 
-    /* Fix the scrollbar corner white box */
     pre.codebox::-webkit-scrollbar-corner {
       background: #1a1a1d;
     }
@@ -107,9 +105,9 @@
       border-radius: 10px;
       font-weight: 600;
       cursor: pointer;
-      width: 100%;
       font-size: 1rem;
       transition: all 0.2s ease;
+      width: 100%;
     }
 
     .copy-btn:hover {
@@ -128,9 +126,20 @@
         transform: translateY(0);
       }
     }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 24px 16px;
+      }
+
+      pre.codebox {
+        font-size: 0.75rem;
+        max-height: 300px;
+      }
+    }
   </style>
 
-  <!-- Prism.js library -->
+  <!-- Prism.js -->
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-lua.min.js"></script>
 </head>
