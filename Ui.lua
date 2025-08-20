@@ -1,676 +1,152 @@
--- Stealth UI Library - Undetectable Roblox GUI Framework
--- Designed to avoid common detection methods
+--========================================================
+-- 🔒 Stealth UI Library (Obfuscated Paths & Names)
+--========================================================
+local StealthUI = {}
+StealthUI.__index = StealthUI
 
-local StealthLib = {}
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local CoreGui = game:GetService("CoreGui")
-
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
-
--- Utility functions for stealth
-local function randomString(length)
+-- random string generator
+local function randomString(len)
     local chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-    local result = ""
-    for i = 1, length do
-        local rand = math.random(1, #chars)
-        result = result .. string.sub(chars, rand, rand)
+    local str = ""
+    for i = 1, len do
+        str = str .. string.sub(chars, math.random(1, #chars), math.random(1, #chars))
     end
-    return result
+    return str
 end
 
-local function createStealthFrame(parent, props)
+-- Create root ScreenGui in CoreGui
+local CoreGui = game:GetService("CoreGui")
+local rootGui = Instance.new("ScreenGui")
+rootGui.Name = randomString(16)
+rootGui.Parent = CoreGui
+rootGui.ResetOnSpawn = false
+
+--========================================================
+-- Window
+--========================================================
+function StealthUI:Window(title, size)
+    local win = {}
+    win._internalName = randomString(16)
+
     local frame = Instance.new("Frame")
-    frame.Parent = parent
-    frame.Name = randomString(8)
-    
-    for prop, value in pairs(props or {}) do
-        frame[prop] = value
-    end
-    
-    return frame
-end
+    frame.Name = randomString(16)
+    frame.Size = UDim2.new(0, size.X, 0, size.Y)
+    frame.Position = UDim2.new(0.5, -size.X/2, 0.5, -size.Y/2)
+    frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    frame.Parent = rootGui
 
-local function createStealthTextLabel(parent, props)
-    local label = Instance.new("TextLabel")
-    label.Parent = parent
-    label.Name = randomString(6)
-    
-    for prop, value in pairs(props or {}) do
-        label[prop] = value
-    end
-    
-    return label
-end
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Name = randomString(16)
+    titleLabel.Text = title
+    titleLabel.Font = Enum.Font.SourceSansBold
+    titleLabel.TextSize = 18
+    titleLabel.TextColor3 = Color3.fromRGB(255,255,255)
+    titleLabel.Size = UDim2.new(1,0,0,30)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Parent = frame
 
-local function createStealthTextButton(parent, props)
-    local button = Instance.new("TextButton")
-    button.Parent = parent
-    button.Name = randomString(7)
-    
-    for prop, value in pairs(props or {}) do
-        button[prop] = value
-    end
-    
-    return button
-end
+    win.Frame = frame
+    win.Tabs = {}
 
-local function createStealthTextBox(parent, props)
-    local textbox = Instance.new("TextBox")
-    textbox.Parent = parent
-    textbox.Name = randomString(9)
-    
-    for prop, value in pairs(props or {}) do
-        textbox[prop] = value
-    end
-    
-    return textbox
-end
+    --====================================================
+    -- Tab Creation
+    --====================================================
+    function win:Tab(tabName)
+        local tab = {}
+        tab._internalName = randomString(16)
 
--- Main UI Library
-function StealthLib:Window(title, color)
-    local windowData = {
-        Title = title or "Window",
-        Color = color or Color3.fromRGB(50, 50, 50),
-        Tabs = {},
-        MainGui = nil,
-        MainFrame = nil,
-        TabContainer = nil,
-        ContentContainer = nil,
-        CurrentTab = nil
-    }
-    
-    -- Create main GUI with random name
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = randomString(12)
-    screenGui.Parent = CoreGui
-    screenGui.ResetOnSpawn = false
-    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    
-    windowData.MainGui = screenGui
-    
-    -- Main window frame
-    local mainFrame = createStealthFrame(screenGui, {
-        Size = UDim2.new(0, 500, 0, 400),
-        Position = UDim2.new(0.5, -250, 0.5, -200),
-        BackgroundColor3 = Color3.new(0.1, 0.1, 0.1),
-        BorderSizePixel = 0,
-        Active = true,
-        Draggable = true
-    })
-    
-    windowData.MainFrame = mainFrame
-    
-    -- Add corner radius
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
-    corner.Parent = mainFrame
-    
-    -- Title bar
-    local titleBar = createStealthFrame(mainFrame, {
-        Size = UDim2.new(1, 0, 0, 30),
-        BackgroundColor3 = windowData.Color,
-        BorderSizePixel = 0
-    })
-    
-    local titleCorner = Instance.new("UICorner")
-    titleCorner.CornerRadius = UDim.new(0, 8)
-    titleCorner.Parent = titleBar
-    
-    -- Title text
-    local titleLabel = createStealthTextLabel(titleBar, {
-        Size = UDim2.new(1, -60, 1, 0),
-        BackgroundTransparency = 1,
-        Text = windowData.Title,
-        TextColor3 = Color3.new(1, 1, 1),
-        TextScaled = true,
-        Font = Enum.Font.GothamBold
-    })
-    
-    -- Close button
-    local closeButton = createStealthTextButton(titleBar, {
-        Size = UDim2.new(0, 30, 1, 0),
-        Position = UDim2.new(1, -30, 0, 0),
-        BackgroundColor3 = Color3.new(0.8, 0.2, 0.2),
-        Text = "X",
-        TextColor3 = Color3.new(1, 1, 1),
-        TextScaled = true,
-        Font = Enum.Font.GothamBold
-    })
-    
-    local closeCorner = Instance.new("UICorner")
-    closeCorner.CornerRadius = UDim.new(0, 4)
-    closeCorner.Parent = closeButton
-    
-    closeButton.MouseButton1Click:Connect(function()
-        screenGui:Destroy()
-    end)
-    
-    -- Tab container
-    local tabContainer = createStealthFrame(mainFrame, {
-        Size = UDim2.new(0, 120, 1, -30),
-        Position = UDim2.new(0, 0, 0, 30),
-        BackgroundColor3 = Color3.new(0.08, 0.08, 0.08),
-        BorderSizePixel = 0
-    })
-    
-    windowData.TabContainer = tabContainer
-    
-    local tabLayout = Instance.new("UIListLayout")
-    tabLayout.Parent = tabContainer
-    tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    tabLayout.Padding = UDim.new(0, 2)
-    
-    -- Content container
-    local contentContainer = createStealthFrame(mainFrame, {
-        Size = UDim2.new(1, -120, 1, -30),
-        Position = UDim2.new(0, 120, 0, 30),
-        BackgroundColor3 = Color3.new(0.12, 0.12, 0.12),
-        BorderSizePixel = 0
-    })
-    
-    windowData.ContentContainer = contentContainer
-    
-    local contentLayout = Instance.new("UIListLayout")
-    contentLayout.Parent = contentContainer
-    contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    contentLayout.Padding = UDim.new(0, 5)
-    
-    local contentPadding = Instance.new("UIPadding")
-    contentPadding.PaddingTop = UDim.new(0, 10)
-    contentPadding.PaddingLeft = UDim.new(0, 10)
-    contentPadding.PaddingRight = UDim.new(0, 10)
-    contentPadding.Parent = contentContainer
-    
-    -- Window methods
-    function windowData:Tab(name)
-        local tabData = {
-            Name = name,
-            Button = nil,
-            Content = nil,
-            Elements = {},
-            Window = windowData
-        }
-        
-        -- Create tab button
-        local tabButton = createStealthTextButton(windowData.TabContainer, {
-            Size = UDim2.new(1, -4, 0, 30),
-            BackgroundColor3 = Color3.new(0.15, 0.15, 0.15),
-            Text = name,
-            TextColor3 = Color3.new(0.8, 0.8, 0.8),
-            TextScaled = true,
-            Font = Enum.Font.Gotham
-        })
-        
-        local tabCorner = Instance.new("UICorner")
-        tabCorner.CornerRadius = UDim.new(0, 4)
-        tabCorner.Parent = tabButton
-        
-        tabData.Button = tabButton
-        
-        -- Create tab content
-        local tabContent = createStealthFrame(windowData.ContentContainer, {
-            Size = UDim2.new(1, -20, 1, -20),
-            BackgroundTransparency = 1,
-            Visible = false
-        })
-        
-        tabData.Content = tabContent
-        
-        local scrollFrame = Instance.new("ScrollingFrame")
-        scrollFrame.Name = randomString(10)
-        scrollFrame.Size = UDim2.new(1, 0, 1, 0)
-        scrollFrame.BackgroundTransparency = 1
-        scrollFrame.BorderSizePixel = 0
-        scrollFrame.ScrollBarThickness = 4
-        scrollFrame.Parent = tabContent
-        
-        local scrollLayout = Instance.new("UIListLayout")
-        scrollLayout.Parent = scrollFrame
-        scrollLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        scrollLayout.Padding = UDim.new(0, 5)
-        
-        -- Auto-resize scrolling frame
-        scrollLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-            scrollFrame.CanvasSize = UDim2.new(0, 0, 0, scrollLayout.AbsoluteContentSize.Y + 10)
-        end)
-        
-        -- Tab button click
-        tabButton.MouseButton1Click:Connect(function()
-            -- Hide all tabs
-            for _, tab in pairs(windowData.Tabs) do
-                tab.Content.Visible = false
-                tab.Button.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
-            end
-            
-            -- Show this tab
-            tabContent.Visible = true
-            tabButton.BackgroundColor3 = windowData.Color
-            windowData.CurrentTab = tabData
-        end)
-        
-        -- Tab methods
-        function tabData:Button(text, callback)
-            local button = createStealthTextButton(scrollFrame, {
-                Size = UDim2.new(1, 0, 0, 30),
-                BackgroundColor3 = windowData.Color,
-                Text = text,
-                TextColor3 = Color3.new(1, 1, 1),
-                TextScaled = true,
-                Font = Enum.Font.Gotham
-            })
-            
-            local buttonCorner = Instance.new("UICorner")
-            buttonCorner.CornerRadius = UDim.new(0, 4)
-            buttonCorner.Parent = button
-            
-            button.MouseButton1Click:Connect(function()
+        local tabFrame = Instance.new("Frame")
+        tabFrame.Name = randomString(16)
+        tabFrame.Size = UDim2.new(1,0,1,-30)
+        tabFrame.Position = UDim2.new(0,0,0,30)
+        tabFrame.BackgroundTransparency = 1
+        tabFrame.Visible = false
+        tabFrame.Parent = frame
+
+        tab.Frame = tabFrame
+        tab.Elements = {}
+
+        -- Button
+        function tab:Button(text, callback)
+            local btn = Instance.new("TextButton")
+            btn.Name = randomString(16)
+            btn.Text = text
+            btn.Font = Enum.Font.SourceSans
+            btn.TextSize = 16
+            btn.TextColor3 = Color3.new(1,1,1)
+            btn.Size = UDim2.new(1,-10,0,30)
+            btn.Position = UDim2.new(0,5,0,#tab.Elements*35)
+            btn.BackgroundColor3 = Color3.fromRGB(45,45,45)
+            btn.Parent = tabFrame
+
+            btn.MouseButton1Click:Connect(function()
                 if callback then
-                    callback()
+                    pcall(callback)
                 end
             end)
-            
-            table.insert(tabData.Elements, button)
-            return button
+
+            table.insert(tab.Elements, btn)
         end
-        
-        function tabData:Toggle(text, callback)
-            local toggleFrame = createStealthFrame(scrollFrame, {
-                Size = UDim2.new(1, 0, 0, 30),
-                BackgroundColor3 = Color3.new(0.2, 0.2, 0.2),
-                BorderSizePixel = 0
-            })
-            
-            local toggleCorner = Instance.new("UICorner")
-            toggleCorner.CornerRadius = UDim.new(0, 4)
-            toggleCorner.Parent = toggleFrame
-            
-            local toggleLabel = createStealthTextLabel(toggleFrame, {
-                Size = UDim2.new(1, -40, 1, 0),
-                BackgroundTransparency = 1,
-                Text = text,
-                TextColor3 = Color3.new(1, 1, 1),
-                TextScaled = true,
-                Font = Enum.Font.Gotham,
-                TextXAlignment = Enum.TextXAlignment.Left
-            })
-            
-            local toggleButton = createStealthTextButton(toggleFrame, {
-                Size = UDim2.new(0, 30, 0, 20),
-                Position = UDim2.new(1, -35, 0.5, -10),
-                BackgroundColor3 = Color3.new(0.8, 0.2, 0.2),
-                Text = "",
-                BorderSizePixel = 0
-            })
-            
-            local buttonCorner = Instance.new("UICorner")
-            buttonCorner.CornerRadius = UDim.new(0, 10)
-            buttonCorner.Parent = toggleButton
-            
-            local isToggled = false
-            
-            toggleButton.MouseButton1Click:Connect(function()
-                isToggled = not isToggled
-                toggleButton.BackgroundColor3 = isToggled and Color3.new(0.2, 0.8, 0.2) or Color3.new(0.8, 0.2, 0.2)
-                
+
+        -- Toggle
+        function tab:Toggle(text, callback)
+            local toggle = Instance.new("TextButton")
+            toggle.Name = randomString(16)
+            toggle.Text = "[ ] " .. text
+            toggle.Font = Enum.Font.SourceSans
+            toggle.TextSize = 16
+            toggle.TextColor3 = Color3.new(1,1,1)
+            toggle.Size = UDim2.new(1,-10,0,30)
+            toggle.Position = UDim2.new(0,5,0,#tab.Elements*35)
+            toggle.BackgroundColor3 = Color3.fromRGB(45,45,45)
+            toggle.Parent = tabFrame
+
+            local state = false
+            toggle.MouseButton1Click:Connect(function()
+                state = not state
+                toggle.Text = (state and "[✔] " or "[ ] ") .. text
                 if callback then
-                    callback(isToggled)
+                    pcall(callback,state)
                 end
             end)
-            
-            table.insert(tabData.Elements, toggleFrame)
-            return toggleFrame
+
+            table.insert(tab.Elements, toggle)
         end
-        
-        function tabData:Slider(text, min, max, default, callback)
-            local sliderFrame = createStealthFrame(scrollFrame, {
-                Size = UDim2.new(1, 0, 0, 50),
-                BackgroundColor3 = Color3.new(0.2, 0.2, 0.2),
-                BorderSizePixel = 0
-            })
-            
-            local sliderCorner = Instance.new("UICorner")
-            sliderCorner.CornerRadius = UDim.new(0, 4)
-            sliderCorner.Parent = sliderFrame
-            
-            local sliderLabel = createStealthTextLabel(sliderFrame, {
-                Size = UDim2.new(1, 0, 0, 20),
-                BackgroundTransparency = 1,
-                Text = text .. ": " .. tostring(default),
-                TextColor3 = Color3.new(1, 1, 1),
-                TextScaled = true,
-                Font = Enum.Font.Gotham
-            })
-            
-            local sliderBackground = createStealthFrame(sliderFrame, {
-                Size = UDim2.new(1, -20, 0, 10),
-                Position = UDim2.new(0, 10, 0, 30),
-                BackgroundColor3 = Color3.new(0.1, 0.1, 0.1),
-                BorderSizePixel = 0
-            })
-            
-            local sliderBgCorner = Instance.new("UICorner")
-            sliderBgCorner.CornerRadius = UDim.new(0, 5)
-            sliderBgCorner.Parent = sliderBackground
-            
-            local sliderFill = createStealthFrame(sliderBackground, {
-                Size = UDim2.new((default - min) / (max - min), 0, 1, 0),
-                BackgroundColor3 = windowData.Color,
-                BorderSizePixel = 0
-            })
-            
-            local sliderFillCorner = Instance.new("UICorner")
-            sliderFillCorner.CornerRadius = UDim.new(0, 5)
-            sliderFillCorner.Parent = sliderFill
-            
-            local currentValue = default
-            local dragging = false
-            
-            local function updateSlider(input)
-                local relativeX = math.clamp((input.Position.X - sliderBackground.AbsolutePosition.X) / sliderBackground.AbsoluteSize.X, 0, 1)
-                currentValue = min + (relativeX * (max - min))
-                currentValue = math.floor(currentValue + 0.5)
-                
-                sliderFill.Size = UDim2.new(relativeX, 0, 1, 0)
-                sliderLabel.Text = text .. ": " .. tostring(currentValue)
-                
-                if callback then
-                    callback(currentValue)
-                end
-            end
-            
-            sliderBackground.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    dragging = true
-                    updateSlider(input)
-                end
-            end)
-            
-            UserInputService.InputChanged:Connect(function(input)
-                if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-                    updateSlider(input)
-                end
-            end)
-            
-            UserInputService.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    dragging = false
-                end
-            end)
-            
-            table.insert(tabData.Elements, sliderFrame)
-            return sliderFrame
-        end
-        
-        function tabData:Dropdown(text, options, callback)
-            local dropdownFrame = createStealthFrame(scrollFrame, {
-                Size = UDim2.new(1, 0, 0, 30),
-                BackgroundColor3 = Color3.new(0.2, 0.2, 0.2),
-                BorderSizePixel = 0
-            })
-            
-            local dropdownCorner = Instance.new("UICorner")
-            dropdownCorner.CornerRadius = UDim.new(0, 4)
-            dropdownCorner.Parent = dropdownFrame
-            
-            local dropdownButton = createStealthTextButton(dropdownFrame, {
-                Size = UDim2.new(1, 0, 1, 0),
-                BackgroundTransparency = 1,
-                Text = text .. ": " .. (options[1] or "None"),
-                TextColor3 = Color3.new(1, 1, 1),
-                TextScaled = true,
-                Font = Enum.Font.Gotham
-            })
-            
-            local dropdownList = createStealthFrame(scrollFrame, {
-                Size = UDim2.new(1, 0, 0, #options * 25),
-                Position = UDim2.new(0, 0, 0, 35),
-                BackgroundColor3 = Color3.new(0.15, 0.15, 0.15),
-                BorderSizePixel = 0,
-                Visible = false,
-                ZIndex = 10
-            })
-            
-            local listCorner = Instance.new("UICorner")
-            listCorner.CornerRadius = UDim.new(0, 4)
-            listCorner.Parent = dropdownList
-            
-            local listLayout = Instance.new("UIListLayout")
-            listLayout.Parent = dropdownList
-            listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-            
-            local currentOption = options[1]
-            
-            for _, option in pairs(options) do
-                local optionButton = createStealthTextButton(dropdownList, {
-                    Size = UDim2.new(1, 0, 0, 25),
-                    BackgroundColor3 = Color3.new(0.18, 0.18, 0.18),
-                    Text = option,
-                    TextColor3 = Color3.new(1, 1, 1),
-                    TextScaled = true,
-                    Font = Enum.Font.Gotham
-                })
-                
-                optionButton.MouseButton1Click:Connect(function()
-                    currentOption = option
-                    dropdownButton.Text = text .. ": " .. option
-                    dropdownList.Visible = false
-                    
-                    if callback then
-                        callback(option)
-                    end
-                end)
-            end
-            
-            dropdownButton.MouseButton1Click:Connect(function()
-                dropdownList.Visible = not dropdownList.Visible
-            end)
-            
-            table.insert(tabData.Elements, dropdownFrame)
-            return dropdownFrame
-        end
-        
-        function tabData:Textbox(placeholder, multiline, callback)
-            local textboxFrame = createStealthFrame(scrollFrame, {
-                Size = UDim2.new(1, 0, 0, multiline and 60 or 30),
-                BackgroundColor3 = Color3.new(0.2, 0.2, 0.2),
-                BorderSizePixel = 0
-            })
-            
-            local textboxCorner = Instance.new("UICorner")
-            textboxCorner.CornerRadius = UDim.new(0, 4)
-            textboxCorner.Parent = textboxFrame
-            
-            local textbox = createStealthTextBox(textboxFrame, {
-                Size = UDim2.new(1, -10, 1, -10),
-                Position = UDim2.new(0, 5, 0, 5),
-                BackgroundTransparency = 1,
-                Text = "",
-                PlaceholderText = placeholder,
-                TextColor3 = Color3.new(1, 1, 1),
-                PlaceholderColor3 = Color3.new(0.7, 0.7, 0.7),
-                TextScaled = not multiline,
-                TextWrapped = multiline,
-                MultiLine = multiline,
-                Font = Enum.Font.Gotham,
-                TextXAlignment = Enum.TextXAlignment.Left,
-                TextYAlignment = multiline and Enum.TextYAlignment.Top or Enum.TextYAlignment.Center
-            })
-            
-            textbox.FocusLost:Connect(function(enterPressed)
-                if callback then
-                    callback(textbox.Text)
-                end
-            end)
-            
-            table.insert(tabData.Elements, textboxFrame)
-            return textboxFrame
-        end
-        
-        table.insert(windowData.Tabs, tabData)
-        
-        -- Auto-select first tab
-        if #windowData.Tabs == 1 then
-            tabButton.MouseButton1Click()
-        end
-        
-        return tabData
+
+        table.insert(win.Tabs, tab)
+        return tab
     end
-    
-    return windowData
+
+    -- Switch tabs
+    function win:ShowTab(tab)
+        for _,t in pairs(win.Tabs) do
+            t.Frame.Visible = false
+        end
+        tab.Frame.Visible = true
+    end
+
+    return win
 end
 
--- Essential functions for the script to work
-local function noclip()
-    for _, part in pairs(game.Players.LocalPlayer.Character:GetChildren()) do
-        if part:IsA("BasePart") and part.CanCollide then
-            part.CanCollide = false
-        end
-    end
-end
+--========================================================
+-- Example Usage
+--========================================================
+local UI = setmetatable({}, StealthUI)
 
--- Teleport function
-function urbantp2(position, speed)
-    local character = game.Players.LocalPlayer.Character
-    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
-    
-    local hrp = character.HumanoidRootPart
-    local distance = (hrp.Position - position).Magnitude
-    
-    if distance < 5 then
-        hrp.CFrame = CFrame.new(position)
-        return
-    end
-    
-    local tweenInfo = TweenInfo.new(
-        distance / (speed or 100),
-        Enum.EasingStyle.Linear,
-        Enum.EasingDirection.InOut
-    )
-    
-    local tween = TweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(position)})
-    tween:Play()
-end
+local win = UI:Window("Main Window", Vector2.new(300,300))
 
--- Look at function
-_G.urbantplookat = nil
-task.spawn(function()
-    while true do
-        if _G.urbantplookat then
-            local character = game.Players.LocalPlayer.Character
-            if character and character:FindFirstChild("HumanoidRootPart") then
-                local hrp = character.HumanoidRootPart
-                local lookDirection = (_G.urbantplookat - hrp.Position).Unit
-                hrp.CFrame = CFrame.lookAt(hrp.Position, hrp.Position + Vector3.new(lookDirection.X, 0, lookDirection.Z))
-            end
-        end
-        task.wait(0.1)
-    end
+local tab1 = win:Tab("Main")
+tab1:Button("Auto Equip", function()
+    print("Auto Equip pressed!")
 end)
 
--- Mouse click function
-function Mouse11()
-    local VirtualUser = game:service('VirtualUser')
-    VirtualUser:CaptureController()
-    VirtualUser:ClickButton1(Vector2.new(100000, 100000))
-end
-
--- Proximity prompt fire function
-function fireproximityprompt(prompt)
-    if prompt and prompt:IsA("ProximityPrompt") then
-        prompt:InputHoldBegin()
-        task.wait(prompt.HoldDuration or 0)
-        prompt:InputHoldEnd()
-    end
-end
-
--- Anti-AFK system
-task.spawn(function()
-    local vu = game:GetService('VirtualUser')
-    game:GetService('Players').LocalPlayer.Idled:Connect(function()
-        vu:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
-        task.wait(1)
-        vu:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
-    end)
+tab1:Toggle("God Mode", function(state)
+    print("God Mode:", state)
 end)
 
--- Speed monitoring system
-task.spawn(function()
-    local PlrSpeed = 16
-    while true do
-        pcall(function()
-            local character = game.Players.LocalPlayer.Character
-            if character and character:FindFirstChild("Humanoid") then
-                local currentSpeed = character.Humanoid.WalkSpeed
-                if currentSpeed ~= PlrSpeed and PlrSpeed > 16 then
-                    character.Humanoid.WalkSpeed = PlrSpeed
-                end
-            end
-        end)
-        task.wait(0.5)
-    end
+local tab2 = win:Tab("Extra")
+tab2:Button("Kill All", function()
+    print("Kill All pressed!")
 end)
 
--- Camera improvements
-task.spawn(function()
-    pcall(function()
-        -- Max Zoom fix
-        game.Players.LocalPlayer.CameraMaxZoomDistance = 1000
-        
-        -- Noclip camera
-        local Players = game:GetService('Players')
-        local LocalPlayer = Players.LocalPlayer
-        local PopperClient = LocalPlayer:WaitForChild('PlayerScripts').PlayerModule.CameraModule.ZoomController.Popper
-        
-        for i, v in next, getgc() do
-            if getfenv(v).script == PopperClient and typeof(v) == 'function' then
-                for i2, v2 in next, debug.getconstants(v) do
-                    if tonumber(v2) == 0.25 then
-                        debug.setconstant(v, i2, 0)
-                    elseif tonumber(v2) == 0 then
-                        debug.setconstant(v, i2, 0.25)
-                    end
-                end
-            end
-        end
-        
-        -- Initial noclip
-        for i, v in pairs(game.Players.LocalPlayer.Character:GetChildren()) do
-            if v.ClassName == 'Part' or v.ClassName == 'MeshPart' then
-                v.CanCollide = false
-            end
-        end
-    end)
-end)
-
--- Infinite Jump system
-local InfJump = false
-local InfJumpStarted = nil
-
--- Speed control system  
-local PlrSpeed = 16
-task.spawn(function()
-    while true do
-        pcall(function()
-            local character = game.Players.LocalPlayer.Character
-            if character and character:FindFirstChild("Humanoid") then
-                if character.Humanoid.WalkSpeed ~= PlrSpeed then
-                    character.Humanoid.WalkSpeed = PlrSpeed
-                end
-            end
-        end)
-        task.wait(0.5)
-    end
-end)
-
--- Make it globally accessible
-getgenv().Lib = StealthLib
-getgenv().noclip = noclip
-getgenv().urbantp2 = urbantp2
-getgenv().Mouse11 = Mouse11
-getgenv().fireproximityprompt = fireproximityprompt
-
-return StealthLib
+win:ShowTab(tab1)
