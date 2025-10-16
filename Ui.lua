@@ -1,8 +1,5 @@
---UI LIBRARY
-
 --UI LIB TOGGLE
 local toggle = true
-
 
 function onKeyPress(actionName, userInputState, inputObject)
     if userInputState == Enum.UserInputState.Begin then
@@ -18,7 +15,7 @@ end
 
 game.ContextActionService:BindAction("keyPress", onKeyPress, false, Enum.KeyCode.Delete)
 
---DESTROY GUI----THANK YOU 10X FOR THIS
+--DESTROY GUI
 function removegui()
     if game:service 'CoreGui':FindFirstChild("Library") then
         game:service 'CoreGui':FindFirstChild("Library"):Destroy()
@@ -26,7 +23,6 @@ function removegui()
 end;
 
 removegui()
-
 
 local Lib = { RainbowColorValue = 0, HueSelectionPosition = 0 }
 local Accent = Color3.fromRGB(138, 80, 255)
@@ -1597,201 +1593,4 @@ function Lib:Window(text, accent)
 
     return WindowTabs
 end
-
---start of 1
-local function urbantp(goal, step, waitime)
-    local jaw = game:GetService("Players").LocalPlayer.Character
-    step = step or 1
-    waitime = waitime or 0.3
-
-    local antifall = Instance.new("BodyVelocity")
-    antifall.Parent = jaw.HumanoidRootPart
-    antifall.Velocity = Vector3.new(0, 0, 0)
-
-    local pointerfol = Instance.new("Folder")
-    pointerfol.Parent = game.Workspace
-
-    local nextx, nexty, nextz
-    local pos = jaw.HumanoidRootPart.Position
-    local rotationdata
-
-    goalpoint = Instance.new("Part")
-    goalpoint.Parent = pointerfol
-    goalpoint.Size = Vector3.new(0.5, 0.5, 0.5)
-    goalpoint.Position = goal
-    goalpoint.CanCollide = false
-    goalpoint.Anchored = true
-    goalpoint.Color = Color3.new(0, 0, 96)
-    goalpoint.Transparency = 0
-    goalpoint.Material = Enum.Material.Neon
-
-    --print("loop start")
-    while true and wait(waitime) do
-        jaw.Humanoid:ChangeState(11)
-        pos = jaw.HumanoidRootPart.Position
-
-        local nextx, nexty, nextz
-
-        if math.abs(pos.X - goal.X) > step then -- x
-            if pos.X - goal.X >= step then
-                --print("x1")
-                nextx = -step
-            else
-                --print("x2")
-                nextx = step
-            end
-        elseif math.abs(pos.X - goal.X) <= step then
-            --print("xtpa")
-            nextx = goal.x
-        end
-
-        if math.abs(pos.Y - goal.Y) > step then -- y
-            if pos.Y - goal.Y >= step then
-                --print("y1")
-                nexty = -step
-            else
-                --print("y2")
-                nexty = step
-            end
-        elseif math.abs(pos.Y - goal.Y) <= step then
-            --print("ytpa")
-            nexty = goal.y
-        end
-
-        if math.abs(pos.Z - goal.Z) > step then -- z
-            if pos.Z - goal.Z >= step then
-                --print("z1")
-                nextz = -step
-            else
-                --print("z2")
-                nextz = step
-            end
-        elseif math.abs(pos.Z - goal.Z) <= step then
-            --print("ztpa")
-            nextz = goal.z
-        end
-
-        -- normalize
-        if nextx ~= goal.x then
-            nextx = pos.x + nextx
-        end
-        if nexty ~= goal.y then
-            nexty = pos.y + nexty
-        end
-        if nextz ~= goal.z then
-            nextz = pos.z + nextz
-        end
-
-        if _G.urbantplookat ~= nil then
-            rotationdata = CFrame.new(jaw.HumanoidRootPart.CFrame.Position, _G.urbantplookat)
-                - jaw.HumanoidRootPart.CFrame.Position
-        else
-            rotationdata = jaw.HumanoidRootPart.CFrame - jaw.HumanoidRootPart.CFrame.Position
-        end
-
-        jaw.HumanoidRootPart.CFrame = CFrame.new(nextx, nexty, nextz) * rotationdata
-
-        if nextx == goal.x and nexty == goal.y and nextz == goal.z then
-            antifall:Destroy()
-            goalpoint:Destroy()
-            pcall(function()
-                pointerfol:Destory()
-            end)
-
-            break
-        end
-    end
-end
---end of 1
-
---start of 2
-function Move(place, stud, tw)
-    local studs = stud
-    _G.move1 = true
-    while place.X < game.Players.LocalPlayer.Character.HumanoidRootPart.Position.X do
-        Wait(tw)
-        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(
-            game.Players.LocalPlayer.Character.HumanoidRootPart.Position.X - studs,
-            game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y,
-            game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Z))
-    end
-    while place.Z < game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Z do
-        Wait(tw)
-        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(
-            game.Players.LocalPlayer.Character.HumanoidRootPart.Position.X,
-            game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y,
-            game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Z - studs))
-    end
-    while place.X > game.Players.LocalPlayer.Character.HumanoidRootPart.Position.X do
-        Wait(tw)
-        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(
-            game.Players.LocalPlayer.Character.HumanoidRootPart.Position.X + studs,
-            game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y,
-            game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Z))
-    end
-    while place.Z > game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Z do
-        Wait(tw)
-        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(
-            game.Players.LocalPlayer.Character.HumanoidRootPart.Position.X,
-            game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y,
-            game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Z + studs))
-    end
-    while place.Y < game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y do
-        Wait(tw)
-        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(
-            game.Players.LocalPlayer.Character.HumanoidRootPart.Position.X,
-            game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y - studs,
-            game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Z))
-    end
-    while place.Y > game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y do
-        Wait(tw)
-        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(
-            game.Players.LocalPlayer.Character.HumanoidRootPart.Position.X,
-            game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y + studs,
-            game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Z))
-    end
-    _G.move1 = false
-end
-
-spawn(function()
-    game:GetService("RunService").Stepped:Connect(function()
-        if _G.move1 then
-            game.Players.LocalPlayer.Character.Humanoid:ChangeState(11)
-        end
-    end)
-end)
---end of 2
-
---start of 3
-local TweenService = game:GetService("TweenService")
-local noclipE      = true
-local antifall     = true
-
-local function noclip()
-    for i, v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
-        if v:IsA("BasePart") and v.CanCollide == true then
-            v.CanCollide = false
-            game.Players.LocalPlayer.Character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
-        end
-    end
-end
-
-local function moveto(obj, speed)
-    local info = TweenInfo.new(
-        ((game.Players.LocalPlayer.Character.HumanoidRootPart.Position - obj.Position).Magnitude) / speed,
-        Enum.EasingStyle.Linear)
-    local tween = TweenService:Create(game.Players.LocalPlayer.Character.HumanoidRootPart, info, { CFrame = obj })
-
-    if not game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("BodyVelocity") then
-        antifall = Instance.new("BodyVelocity", game.Players.LocalPlayer.Character.HumanoidRootPart)
-        antifall.Velocity = Vector3.new(0, 0, 0)
-        noclipE = game:GetService("RunService").Stepped:Connect(noclip)
-        tween:Play()
-    end
-
-    tween.Completed:Connect(function()
-        antifall:Destroy()
-        noclipE:Disconnect()
-    end)
-end
--- end of 3
+return Lib
