@@ -1,4 +1,4 @@
-local _K={"QmxhZGVCYWxsUmVsZWFzZSE=","THVuYUxpZmU=","Q2luY28xMjI0","SzZMaWZl","S2FhbkxpZmU=","S3dhTGlmZQ==","Sm9uTGlmZQ==","U2FmZUxpZmU=","WmFrTGlmZQ==","VW5peExpZmU=","UFRUTGlmZQ==","RmF0aGVyTGlmZQ==","R3VhdmFMaWZl","VXJiYW4=","R2Vtc0xpZmU=","U29tTGlmZQ==","QWxham1pTGlmZQ=="}
+local _K={"QXNrRm9yUmVxdWVzdHNJbkRpc2NvcmQh","THVuYUxpZmU=","Q2luY28xMjI0","SzZMaWZl","S2FhbkxpZmU=","S3dhTGlmZQ==","Sm9uTGlmZQ==","U2FmZUxpZmU=","WmFrTGlmZQ==","VW5peExpZmU=","UFRUTGlmZQ==","RmF0aGVyTGlmZQ==","R3VhdmFMaWZl","VXJiYW4=","R2Vtc0xpZmU=","U29tTGlmZQ==","QWxham1pTGlmZQ=="}
 local _B='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 local function _D(d)
  d=string.gsub(d,'[^'.._B..'=]','')
