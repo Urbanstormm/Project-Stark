@@ -7,6 +7,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Key</title>
 
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png">
+
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
 
@@ -34,6 +37,9 @@
       color: white;
       min-height: 100vh;
       padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .container {
@@ -42,24 +48,27 @@
       backdrop-filter: blur(25px);
       -webkit-backdrop-filter: blur(25px);
       border-radius: 22px;
-      max-width: 900px;
+      width: fit-content;
+      max-width: 90vw;
+      min-width: 320px;
       margin: 0 auto;
-      padding: 32px 24px;
+      padding: 40px 48px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
       animation: fadeIn 0.8s ease;
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 28px;
     }
 
     .title {
       text-align: center;
-      font-size: 1.8rem;
+      font-size: clamp(1.5rem, 4vw, 2rem);
       font-weight: 600;
       color: var(--accent);
       text-decoration: none;
       transition: opacity 0.2s ease;
       cursor: pointer;
+      white-space: nowrap;
     }
 
     .title:hover {
@@ -69,10 +78,10 @@
     pre.codebox {
       background: #1a1a1d;
       border-radius: 14px;
-      padding: 20px;
+      padding: 24px 32px;
       font-family: monospace;
-      font-size: 0.85rem;
-      line-height: 1.5;
+      font-size: clamp(0.9rem, 2vw, 1.1rem);
+      line-height: 1.6;
       color: white;
       overflow-x: auto;
       overflow-y: auto;
@@ -81,7 +90,11 @@
       text-align: center;
       width: fit-content;
       margin: 0 auto;
-      min-width: 200px;
+      min-width: 250px;
+    }
+
+    pre.codebox code {
+      display: inline-block;
     }
 
     /* Scrollbar styling */
@@ -107,13 +120,14 @@
       background: var(--accent);
       border: none;
       color: white;
-      padding: 12px 18px;
+      padding: 14px 24px;
       border-radius: 10px;
       font-weight: 600;
       cursor: pointer;
-      font-size: 1rem;
+      font-size: clamp(0.9rem, 2vw, 1.05rem);
       transition: all 0.2s ease;
       width: 100%;
+      white-space: nowrap;
     }
 
     .copy-btn:hover {
@@ -133,14 +147,54 @@
       }
     }
 
-    @media (max-width: 600px) {
+    /* Tablet */
+    @media (max-width: 768px) {
       .container {
-        padding: 24px 16px;
+        padding: 32px 36px;
+        gap: 24px;
+        max-width: 95vw;
       }
 
       pre.codebox {
-        font-size: 0.75rem;
+        padding: 20px 24px;
+        min-width: 200px;
+      }
+    }
+
+    /* Mobile */
+    @media (max-width: 480px) {
+      html, body {
+        padding: 12px;
+      }
+
+      .container {
+        padding: 24px 20px;
+        gap: 20px;
+        min-width: 280px;
         max-width: 100%;
+      }
+
+      pre.codebox {
+        padding: 16px 20px;
+        min-width: auto;
+        max-width: 100%;
+        font-size: 0.85rem;
+      }
+
+      .copy-btn {
+        padding: 12px 18px;
+      }
+    }
+
+    /* Large Desktop */
+    @media (min-width: 1200px) {
+      .container {
+        padding: 48px 56px;
+        gap: 32px;
+      }
+
+      pre.codebox {
+        padding: 28px 40px;
       }
     }
   </style>
