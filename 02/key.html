@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4714915201682867"
-     crossorigin="anonymous"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4714915201682867" crossorigin="anonymous"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Project Stark | Key</title>
+
+  <!-- Canonical so search engines treat all obfuscated URLs as this page -->
+  <link rel="canonical" href="https://Urbanstorm.uk/key.html"/>
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png">
@@ -24,13 +26,7 @@
       --glass: rgba(255, 255, 255, 0.06);
       --border: rgba(255, 255, 255, 0.12);
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       background: var(--bg-dark);
       font-family: 'Inter', sans-serif;
@@ -41,7 +37,6 @@
       align-items: center;
       justify-content: center;
     }
-
     .container {
       background: var(--glass);
       border: 1px solid var(--border);
@@ -59,7 +54,6 @@
       flex-direction: column;
       gap: 28px;
     }
-
     .title {
       text-align: center;
       font-size: clamp(1.5rem, 4vw, 2rem);
@@ -70,11 +64,7 @@
       cursor: pointer;
       white-space: nowrap;
     }
-
-    .title:hover {
-      opacity: 0.8;
-    }
-
+    .title:hover { opacity: 0.8; }
     pre.codebox {
       background: #1a1a1d;
       border-radius: 14px;
@@ -92,29 +82,11 @@
       margin: 0 auto;
       min-width: 250px;
     }
-
-    pre.codebox code {
-      display: inline-block;
-    }
-
-    /* Scrollbar styling */
-    pre.codebox::-webkit-scrollbar {
-      height: 8px;
-      width: 8px;
-    }
-
-    pre.codebox::-webkit-scrollbar-track {
-      background: #111;
-    }
-
-    pre.codebox::-webkit-scrollbar-thumb {
-      background-color: var(--accent);
-      border-radius: 4px;
-    }
-
-    pre.codebox::-webkit-scrollbar-corner {
-      background: #1a1a1d;
-    }
+    pre.codebox code { display: inline-block; }
+    pre.codebox::-webkit-scrollbar { height: 8px; width: 8px; }
+    pre.codebox::-webkit-scrollbar-track { background: #111; }
+    pre.codebox::-webkit-scrollbar-thumb { background-color: var(--accent); border-radius: 4px; }
+    pre.codebox::-webkit-scrollbar-corner { background: #1a1a1d; }
 
     .copy-btn {
       background: var(--accent);
@@ -129,73 +101,28 @@
       width: 100%;
       white-space: nowrap;
     }
-
     .copy-btn:hover {
       background: var(--accent-hover);
       transform: scale(1.02);
       box-shadow: 0 4px 18px rgba(168, 85, 247, 0.3);
     }
-
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-
-    /* Tablet */
     @media (max-width: 768px) {
-      .container {
-        padding: 32px 36px;
-        gap: 24px;
-        max-width: 95vw;
-      }
-
-      pre.codebox {
-        padding: 20px 24px;
-        min-width: 200px;
-      }
+      .container { padding: 32px 36px; gap: 24px; max-width: 95vw; }
+      pre.codebox { padding: 20px 24px; min-width: 200px; }
     }
-
-    /* Mobile */
     @media (max-width: 480px) {
-      html, body {
-        padding: 12px;
-      }
-
-      .container {
-        padding: 24px 20px;
-        gap: 20px;
-        min-width: 280px;
-        max-width: 100%;
-      }
-
-      pre.codebox {
-        padding: 16px 20px;
-        min-width: auto;
-        max-width: 100%;
-        font-size: 0.85rem;
-      }
-
-      .copy-btn {
-        padding: 12px 18px;
-      }
+      html, body { padding: 12px; }
+      .container { padding: 24px 20px; gap: 20px; min-width: 280px; max-width: 100%; }
+      pre.codebox { padding: 16px 20px; min-width: auto; max-width: 100%; font-size: 0.85rem; }
+      .copy-btn { padding: 12px 18px; }
     }
-
-    /* Large Desktop */
     @media (min-width: 1200px) {
-      .container {
-        padding: 48px 56px;
-        gap: 32px;
-      }
-
-      pre.codebox {
-        padding: 28px 40px;
-      }
+      .container { padding: 48px 56px; gap: 32px; }
+      pre.codebox { padding: 28px 40px; }
     }
   </style>
 
@@ -205,7 +132,7 @@
 </head>
 <body>
   <div class="container">
-    <a href="https://Urbanstorm.uk" class="title">Project Stark</a>
+    <a href="https://Urbanstorm.uk" class="title" rel="nofollow">Project Stark</a>
 
     <pre class="codebox"><code class="language-none" id="code">P/S_c2Rmc2Rm</code></pre>
 
@@ -222,6 +149,65 @@
         setTimeout(() => btn.textContent = 'Copy Key', 2000);
       });
     }
+
+    /* ------------------------------
+       URL Obfuscation / History Mode
+       ------------------------------
+       HISTORY_MODE:
+         'push'    -> each change creates a history entry
+         'replace' -> changes URL without adding history entries
+       CHANGE_EVERY_MS: how often the token rotates
+       TOKEN_LENGTH: chars in the token
+       PATH_STRATEGY:
+         'query'   -> ?t=abc (safe for static hosts)
+         'hash'    -> #t=abc (never hits server; also safe)
+    */
+    (function() {
+      const HISTORY_MODE = 'push';       // 'push' or 'replace'
+      const PATH_STRATEGY = 'query';     // 'query' or 'hash'
+      const CHANGE_EVERY_MS = 12000;     // rotate every 12s
+      const TOKEN_LENGTH = 10;
+
+      function token(len) {
+        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let s = '';
+        for (let i = 0; i < len; i++) s += chars[Math.floor(Math.random() * chars.length)];
+        return s;
+      }
+
+      function setUrl(newToken, mode) {
+        const { pathname, search, hash } = window.location;
+        let nextUrl;
+
+        if (PATH_STRATEGY === 'hash') {
+          // Keep path/search; only change hash
+          nextUrl = pathname + search + '#t=' + newToken;
+        } else {
+          // Default: query param so refresh stays on this file (safe for GitHub Pages)
+          const base = pathname.replace(/\/+$/,'');
+          const params = new URLSearchParams(search);
+          params.set('t', newToken);
+          nextUrl = base + '?' + params.toString() + (hash && !hash.startsWith('#t=') ? hash : '');
+        }
+
+        if (mode === 'push') {
+          history.pushState({ t: newToken }, '', nextUrl);
+        } else {
+          history.replaceState({ t: newToken }, '', nextUrl);
+        }
+      }
+
+      // Initial apply (don’t reuse an existing t= unless you want to)
+      setUrl(token(TOKEN_LENGTH), HISTORY_MODE);
+
+      // Keep changing while the user stays
+      setInterval(() => setUrl(token(TOKEN_LENGTH), HISTORY_MODE), CHANGE_EVERY_MS);
+
+      // Optional: prevent accidental scroll resets on history navigation
+      window.addEventListener('popstate', () => {
+        // do nothing; URL changes are cosmetic
+      });
+    })();
   </script>
 </body>
 </html>
