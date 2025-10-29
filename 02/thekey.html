@@ -18,7 +18,7 @@
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{background:var(--bg-dark);font-family:'Inter',sans-serif;color:white;min-height:100vh;padding:20px;display:flex;align-items:center;justify-content:center}
     .container{background:var(--glass);border:1px solid var(--border);backdrop-filter:blur(25px);-webkit-backdrop-filter:blur(25px);border-radius:22px;width:fit-content;max-width:90vw;min-width:320px;margin:0 auto;padding:40px 48px;box-shadow:0 20px 60px rgba(0,0,0,0.45);animation:fadeIn 0.8s ease;display:flex;flex-direction:column;gap:28px}
-    .title{ text-align:center;font-size:clamp(1.5rem,4vw,2rem);font-weight:600;color:var(--accent);text-decoration:none;transition:opacity .2s;cursor:pointer;white-space:nowrap}
+    .title{text-align:center;font-size:clamp(1.5rem,4vw,2rem);font-weight:600;color:var(--accent);text-decoration:none;transition:opacity .2s;cursor:pointer;white-space:nowrap}
     .title:hover{opacity:.8}
     pre.codebox{background:#1a1a1d;border-radius:14px;padding:24px 32px;font-family:monospace;font-size:clamp(.9rem,2vw,1.1rem);line-height:1.6;color:white;overflow-x:auto;overflow-y:auto;max-height:max-content;white-space:pre;text-align:center;width:fit-content;margin:0 auto;min-width:250px}
     pre.codebox code{display:inline-block}
@@ -44,6 +44,7 @@
   </div>
 
   <script>
+    // Copy button logic
     function copyCode() {
       const codeElement = document.getElementById('code');
       const text = codeElement.textContent;
@@ -54,58 +55,40 @@
       });
     }
 
-    /* ------------------------------
-       URL Hiding: show root or use hash
-       - MODE = 'root'  -> https://urbanstorm.uk/?t=TOKEN  (hides key.html)
-       - MODE = 'hash'  -> https://urbanstorm.uk/#t=TOKEN   (hides key.html and query)
-       - HISTORY_MODE: 'push' or 'replace'
-       Notes:
-         - If your key file lives in a sub-folder (e.g. /02/key.html), this script will still replace the visible path with '/' (root).
-         - If you want pretty path /TOKEN you need server rewrites (see notes below).
-    */
+    /* ===============================
+       URL Protection + History Cleanup
+       =============================== */
     (function() {
-      const MODE = 'root';            // 'root' or 'hash'
-      const HISTORY_MODE = 'push';    // 'push' or 'replace'
       const CHANGE_EVERY_MS = 300;
       const TOKEN_LENGTH = 10;
+
+      // Immediately replace initial URL (removes /02/key.html from history)
+      function replaceInitial() {
+        const cleanUrl = window.location.origin + '/';
+        history.replaceState({}, '', cleanUrl);
+      }
 
       function makeToken(len) {
         const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         let s = '';
-        for (let i=0;i<len;i++) s += chars[Math.floor(Math.random()*chars.length)];
+        for (let i = 0; i < len; i++) s += chars[Math.floor(Math.random() * chars.length)];
         return s;
       }
 
-      function getRootBase() {
-        // Return scheme + host + "/"
-        return window.location.origin + '/';
+      function setUrl(token) {
+        const url = window.location.origin + '/?t=' + token;
+        history.replaceState({}, '', url);
       }
 
-      function setUrlWithRoot(tokenStr) {
-        let nextUrl;
-        if (MODE === 'hash') {
-          // show root with hash
-          nextUrl = getRootBase() + '#t=' + tokenStr;
-        } else {
-          // show root with query param
-          nextUrl = getRootBase() + '?t=' + tokenStr;
-        }
+      // Step 1: Wipe initial visit
+      replaceInitial();
 
-        if (HISTORY_MODE === 'push') {
-          history.pushState({t: tokenStr}, '', nextUrl);
-        } else {
-          history.replaceState({t: tokenStr}, '', nextUrl);
-        }
-      }
+      // Step 2: Start rotating obfuscated tokens
+      setUrl(makeToken(TOKEN_LENGTH));
+      setInterval(() => setUrl(makeToken(TOKEN_LENGTH)), CHANGE_EVERY_MS);
 
-      // apply immediately
-      setUrlWithRoot(makeToken(TOKEN_LENGTH));
-
-      // rotate while on page
-      setInterval(() => setUrlWithRoot(makeToken(TOKEN_LENGTH)), CHANGE_EVERY_MS);
-
-      // choose to ignore popstate changes (we're cosmetic)
-      window.addEventListener('popstate', () => { /* no-op */ });
+      // Ignore back button / popstate events
+      window.addEventListener('popstate', () => {});
     })();
   </script>
 </body>
