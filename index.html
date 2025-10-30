@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4714915201682867"
-     crossorigin="anonymous"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4714915201682867" crossorigin="anonymous"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Project Stark</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+
   <style>
     :root {
       --accent: #a855f7;
@@ -19,99 +19,82 @@
       --shadow: rgba(0, 0, 0, 0.45);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{
+      height:100%;
+      background:var(--bg-dark);
+      font-family:'Inter',sans-serif;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--text-main);
+      overflow:hidden;
     }
 
-    html, body {
-      height: 100%;
-      background: var(--bg-dark);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-main);
-      overflow: hidden;
+    .card{
+      background:var(--glass);
+      border:1px solid var(--border);
+      backdrop-filter:blur(25px);
+      -webkit-backdrop-filter:blur(25px);
+      border-radius:28px;
+      box-shadow:0 40px 80px var(--shadow);
+      padding:50px 40px;
+      width:100%;
+      max-width:420px;
+      text-align:center;
+      animation:popIn 1.2s ease;
     }
 
-    .card {
-      background: var(--glass);
-      border: 1px solid var(--border);
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
-      border-radius: 28px;
-      box-shadow: 0 40px 80px var(--shadow);
-      padding: 50px 40px;
-      width: 100%;
-      max-width: 420px;
-      text-align: center;
-      animation: popIn 1.2s ease;
+    .card h1{
+      font-size:2.2rem;
+      font-weight:600;
+      margin-bottom:16px;
+      color:var(--accent);
     }
 
-    .card h1 {
-      font-size: 2.2rem;
-      font-weight: 600;
-      margin-bottom: 16px;
-      color: var(--accent); /* <-- now purple */
+    .card p{
+      color:var(--text-subtle);
+      font-size:1rem;
+      margin-bottom:36px;
     }
 
-    .card p {
-      color: var(--text-subtle);
-      font-size: 1rem;
-      margin-bottom: 36px;
+    .btn{
+      display:block;
+      width:100%;
+      padding:16px;
+      margin-bottom:18px;
+      font-size:1rem;
+      font-weight:600;
+      background:var(--accent);
+      color:white;
+      border:none;
+      border-radius:14px;
+      cursor:pointer;
+      transition:all 0.25s ease;
+      box-shadow:0 0 0 transparent;
+    }
+    .btn:hover{
+      background:var(--accent-hover);
+      transform:translateY(-1px) scale(1.02);
+      box-shadow:0 4px 20px rgba(168,85,247,0.4);
     }
 
-    .btn {
-      display: block;
-      width: 100%;
-      padding: 16px;
-      margin-bottom: 18px;
-      font-size: 1rem;
-      font-weight: 600;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 14px;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      box-shadow: 0 0 0 transparent;
+    .footer{
+      margin-top:30px;
+      font-size:0.85rem;
+      color:#777;
     }
 
-    .btn:hover {
-      background: var(--accent-hover);
-      transform: translateY(-1px) scale(1.02);
-      box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
+    @keyframes popIn{
+      from{opacity:0;transform:scale(0.95) translateY(20px);}
+      to{opacity:1;transform:scale(1) translateY(0);}
     }
 
-    .footer {
-      margin-top: 30px;
-      font-size: 0.85rem;
-      color: #777;
+    @media (max-width:480px){
+      .card{padding:35px 24px;}
     }
 
-    @keyframes popIn {
-      from {
-        opacity: 0;
-        transform: scale(0.95) translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
-    }
-
-    @media (max-width: 480px) {
-      .card {
-        padding: 35px 24px;
-      }
-    }
-
-    ::selection {
-      background: var(--accent);
-      color: black;
-    }
+    ::selection{background:var(--accent);color:black;}
   </style>
 </head>
 <body>
@@ -119,11 +102,60 @@
     <h1>Project Stark</h1>
     <p>Sleek Design. Premium, in a free package.</p>
 
-    <button class="btn" onclick="window.open('https://discord.gg/vgYZApyrZC', '_blank')">Join Discord</button>
+    <button class="btn" onclick="window.open('https://discord.gg/vgYZApyrZC','_blank')">Join Discord</button>
     <button class="btn" onclick="window.location.href='02/loadstring.html'">Get Loadstring</button>
     <button class="btn" onclick="window.location.href='02/links.html'">Get Key</button>
 
-    <div class="footer">© 2025 Project Stark. Elegance in access.</div>
+    <div class="footer" id="footer">
+      © 2025 Project Stark. Elegance in access.
+    </div>
   </div>
+
+  <script>
+    (async function(){
+      const OWNER = "Urbanstormm";
+      const REPO  = "Project-Stark";
+      const FILE  = "02/thekey.html";
+      const footer = document.getElementById("footer");
+      let lastDate = null;
+
+      function formatRelative(d){
+        const now = new Date();
+        const diff = Math.floor((now - d)/1000);
+        if(diff < 10) return "just now";
+        if(diff < 60) return diff+"s ago";
+        if(diff < 3600) return Math.floor(diff/60)+"m ago";
+        if(diff < 86400) return Math.floor(diff/3600)+"h ago";
+        if(diff < 604800) return Math.floor(diff/86400)+"d ago";
+        return d.toLocaleDateString()+" "+d.toLocaleTimeString();
+      }
+
+      async function fetchLastCommit(){
+        try{
+          const api = `https://api.github.com/repos/${OWNER}/${REPO}/commits?path=${encodeURIComponent(FILE)}&per_page=1`;
+          const r = await fetch(api,{cache:"no-store"});
+          if(!r.ok) throw new Error("GitHub API error");
+          const data = await r.json();
+          const dateStr = data[0]?.commit?.committer?.date || data[0]?.commit?.author?.date;
+          lastDate = new Date(dateStr);
+          updateFooter();
+        }catch(e){
+          footer.textContent = "© 2025 Project Stark. Elegance in access.";
+          console.error(e);
+        }
+      }
+
+      function updateFooter(){
+        if(!lastDate) return;
+        const rel = formatRelative(lastDate);
+        footer.textContent = `© 2025 Project Stark |  Last updated ${rel}`;
+        footer.title = "Exact: "+lastDate.toISOString();
+      }
+
+      // initial fetch + refresh display every minute
+      await fetchLastCommit();
+      setInterval(updateFooter,60000);
+    })();
+  </script>
 </body>
 </html>
