@@ -1,6 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+  (function () {
+    // === Config ===
+    const CHANGE_EVERY_MS = 300;   // how often to rotate the token
+    const TOKEN_LENGTH   = 10;     // token size
+    const PARAM_NAME     = "PS";    // query param to rotate
+
+    // Better RNG (falls back to Math.random)
+    function randChar() {
+      const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      if (window.crypto && crypto.getRandomValues) {
+        const buf = new Uint8Array(1);
+        crypto.getRandomValues(buf);
+        return chars[buf[0] % chars.length];
+      }
+      return chars[Math.floor(Math.random() * chars.length)];
+    }
+    function makeToken(n) {
+      let s = "";
+      for (let i = 0; i < n; i++) s += randChar();
+      return s;
+    }
+
+    function baseUrl() {
+      // Keep origin + root path only
+      return window.location.origin + "/";
+    }
+
+    function setUrl(token) {
+      const url = `${baseUrl()}?${PARAM_NAME}=${token}`;
+      history.replaceState({}, "", url);
+    }
+
+    // Strip any existing query/hash, then start rotating
+    history.replaceState({}, "", baseUrl());
+    setUrl(makeToken(TOKEN_LENGTH));
+    setInterval(() => setUrl(makeToken(TOKEN_LENGTH)), CHANGE_EVERY_MS);
+
+    // Optional: ignore back/forward
+    window.addEventListener("popstate", () => {});
+  })();
+</script>
+
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4714915201682867"
      crossorigin="anonymous"></script>
   <meta charset="UTF-8" />
@@ -129,5 +172,6 @@
 
 </body>
 </html>
+
 
 
