@@ -35,7 +35,7 @@
 <body>
   <div class="container">
     <a href="https://urbanstorm.uk" class="title" rel="nofollow">Project Stark</a>
-    <pre class="codebox"><code class="language-none" id="code">P/S_HSIQ1=</code></pre>
+    <pre class="codebox"><code class="language-none" id="code">loading…</code></pre>
     <button class="copy-btn" onclick="copyCode()">Copy Key</button>
     <div class="last-updated" id="last-updated">Last updated: checking…</div>
   </div>
@@ -80,13 +80,54 @@
     })();
 
     /* ===============================
-       GitHub Last Updated (live clock)
+       Fetch & show FIRST decoded key
+       from vgYZApyrZC (_K[1])
+       =============================== */
+    (async function () {
+      const RAW_URL = "https://raw.githubusercontent.com/Urbanstormm/Project-Stark/main/vgYZApyrZC";
+      const codeEl = document.getElementById("code");
+
+      // Base64 decoder (tolerant to missing padding)
+      function b64decodeLoose(s) {
+        s = (s || "").replace(/[^A-Za-z0-9+/=]/g, "");
+        const mod = s.length % 4;
+        if (mod === 2) s += "==";
+        else if (mod === 3) s += "=";
+        const bin = atob(s);
+        try { return decodeURIComponent(escape(bin)); } catch { return bin; }
+      }
+
+      try {
+        const resp = await fetch(RAW_URL, { cache: "no-store" });
+        if (!resp.ok) throw new Error("Fetch failed");
+        const text = await resp.text();
+
+        // Find local _K={ ... }
+        const m = text.match(/local\s+_K\s*=\s*{([\s\S]*?)}/m);
+        if (!m) throw new Error("Could not find _K array");
+        const inside = m[1];
+
+        // Get the first quoted entry
+        const first = (inside.match(/"([^"]*)"/) || [])[1];
+        if (!first) throw new Error("Could not find first key");
+
+        // Decode and display ONLY the decoded text
+        const decoded = b64decodeLoose(first);
+        codeEl.textContent = decoded || "(empty)";
+      } catch (e) {
+        console.error(e);
+        codeEl.textContent = "error_loading_key";
+      }
+    })();
+
+    /* ===============================
+       GitHub Last Updated (vgYZApyrZC)
        =============================== */
     (async function(){
       const el = document.getElementById('last-updated');
       const OWNER = 'Urbanstormm';
       const REPO = 'Project-Stark';
-      const FILE_PATH = '02/thekey.html';
+      const FILE_PATH = 'vgYZApyrZC';
       let lastDate = null;
 
       function formatRelative(d){
@@ -115,7 +156,7 @@
         console.error(e);
       }
 
-      // Live clock update every 60s
+      // Update every 60s
       setInterval(() => {
         if(lastDate) el.textContent = 'Last updated: ' + formatRelative(lastDate);
       }, 60000);
