@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>404 - Page Not Found | Project Stark</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --accent: #a855f7;
+      --accent-hover: #9333ea;
+      --text-main: #ffffff;
+      --text-subtle: #cfcfcf;
+      --bg-dark: #0e0e11;
+      --glass: rgba(255, 255, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.12);
+      --shadow: rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg-dark);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      overflow: hidden;
+      padding: 20px;
+    }
+
+    .card {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border-radius: 28px;
+      box-shadow: 0 0 60px rgba(0, 0, 0, 0.6);
+      padding: 50px 40px;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      animation: popIn 1.2s ease;
+    }
+
+    .error-code {
+      font-size: 7rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent) 0%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 20px;
+      animation: glitch 3s infinite;
+    }
+
+    .card h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text-main);
+    }
+
+    .card p {
+      color: var(--text-subtle);
+      font-size: 1rem;
+      margin-bottom: 36px;
+      line-height: 1.6;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      margin-bottom: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 0 0 transparent;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px) scale(1.02);
+      box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-subtle);
+    }
+
+    .btn-secondary:hover {
+      background: var(--glass);
+      border-color: var(--accent);
+      color: var(--text-main);
+      box-shadow: 0 4px 20px rgba(168, 85, 247, 0.2);
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-size: 0.85rem;
+      color: #777;
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    @keyframes glitch {
+      0%, 100% {
+        transform: translate(0);
+      }
+      20% {
+        transform: translate(-2px, 2px);
+      }
+      40% {
+        transform: translate(-2px, -2px);
+      }
+      60% {
+        transform: translate(2px, 2px);
+      }
+      80% {
+        transform: translate(2px, -2px);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 35px 24px;
+      }
+      .error-code {
+        font-size: 5rem;
+      }
+      .card h1 {
+        font-size: 1.5rem;
+      }
+    }
+
+    ::selection {
+      background: var(--accent);
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="error-code">404</div>
+    <h1>Page Not Found</h1>
+    <p>Looks like you've ventured into uncharted territory. The page you're looking for doesn't exist.</p>
+
+    <button class="btn" onclick="window.location.href='/'">Return Home</button>
+    <button class="btn btn-secondary" onclick="history.back()">Go Back</button>
+
+    <div class="footer">© 2025 Project Stark</div>
+  </div>
+
+  <script>
+  (function () {
+    // === Config ===
+    const CHANGE_EVERY_MS = 300;   // how often to rotate the token
+    const TOKEN_LENGTH   = 10;     // token size
+    const PARAM_NAME     = "PS";    // query param to rotate
+
+    // Better RNG (falls back to Math.random)
+    function randChar() {
+      const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      if (window.crypto && crypto.getRandomValues) {
+        const buf = new Uint8Array(1);
+        crypto.getRandomValues(buf);
+        return chars[buf[0] % chars.length];
+      }
+      return chars[Math.floor(Math.random() * chars.length)];
+    }
+    function makeToken(n) {
+      let s = "";
+      for (let i = 0; i < n; i++) s += randChar();
+      return s;
+    }
+
+    function baseUrl() {
+      // Keep origin + root path only
+      return window.location.origin + "/";
+    }
+
+    function setUrl(token) {
+      const url = `${baseUrl()}?${PARAM_NAME}=${token}`;
+      history.replaceState({}, "", url);
+    }
+
+    // Strip any existing query/hash, then start rotating
+    history.replaceState({}, "", baseUrl());
+    setUrl(makeToken(TOKEN_LENGTH));
+    setInterval(() => setUrl(makeToken(TOKEN_LENGTH)), CHANGE_EVERY_MS);
+
+    // Optional: ignore back/forward
+    window.addEventListener("popstate", () => {});
+  })();
+  </script>
+</body>
+</html>
