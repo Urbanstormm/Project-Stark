@@ -1,16 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4714915201682867" crossorigin="anonymous"></script>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Project Stark</title>
 
   <link rel="canonical" href="https://urbanstorm.uk/"/>
   <link rel="icon" type="image/png" href="favicon.png">
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+
+  <!-- Prism.js dark theme -->
   <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.css" rel="stylesheet" />
 
   <style>
@@ -22,7 +28,7 @@
       --bg-dark: #0e0e11;
       --glass: rgba(255,255,255,0.06);
       --border: rgba(255,255,255,0.12);
-      --shadow: rgba(0,0,0,0.55);
+      --shadow: rgba(0, 0, 0, 0.55);
 
       --bg-dur: 1600ms;
       --reveal-dur: 950ms;
@@ -48,7 +54,7 @@
       overflow: hidden;
     }
 
-    /* Background gradients (match main site) */
+    /* Background gradient layer */
     .bg {
       position: fixed;
       inset: -2% -2% -2% -2%;
@@ -127,7 +133,7 @@
     }
     @keyframes revealUp {
       60% { opacity: 1; }
-      to { opacity: 1; transform: translateY(0) scale(1); }
+      to  { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     .title {
@@ -148,77 +154,77 @@
     .title:hover { opacity: .8; }
 
     .codebox {
-      background: #1a1a1d;
-      border-radius: 18px;
-      padding: 22px 26px;
-      font-family: monospace;
-      font-size: clamp(.9rem, 2vw, 1.05rem);
-      line-height: 1.6;
-      color: white;
-      overflow-x: auto;
-      overflow-y: auto;
-      max-height: max-content;
-      white-space: pre;
-      text-align: left;
-      margin: 0;
+      background:#1a1a1d;
+      border-radius:18px;
+      padding:24px 26px;
+      font-family:monospace;
+      font-size:clamp(.9rem,2vw,1.05rem);
+      line-height:1.6;
+      color:white;
+      overflow-x:auto;
+      overflow-y:auto;
+      max-height:max-content;
+      white-space:pre;
+      text-align:left;
+      margin:0;
     }
-    .codebox code { display: inline-block; }
+    .codebox code { display:inline-block; }
 
     .codebox::-webkit-scrollbar{height:8px;width:8px}
     .codebox::-webkit-scrollbar-track{background:#111}
     .codebox::-webkit-scrollbar-thumb{background-color:var(--accent);border-radius:4px}
 
-    .btn {
+    .copy-btn {
       appearance: none;
       -webkit-appearance: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      width: 100%;
-      padding: 14px 16px;
-      font-size: 1rem;
-      font-weight: 600;
-      text-decoration: none;
-      color: var(--text-subtle);
-      background: rgba(255, 255, 255, 0.06);
+      background: rgba(255,255,255,0.06);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      cursor: pointer;
-      transition: transform .35s ease, box-shadow .35s ease, background .35s ease, color .35s ease, border-color .35s ease;
-      box-shadow: none;
-      margin-top: 6px;
+      color: var(--text-subtle);
+      padding:14px 24px;
+      border-radius:14px;
+      font-weight:600;
+      cursor:pointer;
+      font-size:clamp(.9rem,2vw,1.05rem);
+      transition:all .35s ease;
+      width:100%;
+      white-space:nowrap;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      margin-top:4px;
+    }
+    .copy-btn:hover{
+      background:linear-gradient(180deg,var(--accent),#8b39eb);
+      border-color:transparent;
+      color:#fff;
+      transform:translateY(-1px) scale(1.01);
+      box-shadow:0 10px 24px rgba(168,85,247,0.38);
+    }
+    .copy-btn:active{
+      transform:translateY(0);
+      box-shadow:0 4px 14px rgba(168,85,247,0.25);
     }
 
-    .btn:hover {
-      color: #fff;
-      background: linear-gradient(180deg, var(--accent), #8b39eb);
-      border-color: transparent;
-      transform: translateY(-1px) scale(1.01);
-      box-shadow: 0 10px 24px rgba(168,85,247,0.38);
-    }
-
-    .btn:active {
-      transform: translateY(0);
-      box-shadow: 0 4px 14px rgba(168,85,247,0.25);
-    }
-
-    .card :is(.btn, .title):focus-visible {
+    .card :is(.copy-btn, .title):focus-visible {
       outline: 3px solid rgba(168,85,247,0.7);
       outline-offset: 2px;
     }
 
-    .last-updated {
-      font-size: 0.9rem;
-      opacity: .9;
-      margin-top: 6px;
-      text-align: center;
-      color: var(--text-subtle);
+    .last-updated{
+      font-size:0.9rem;
+      opacity:.9;
+      margin-top:6px;
+      text-align:center;
+      color:var(--text-subtle);
     }
 
-    @media (max-width: 480px) {
+    @media (max-width: 600px) {
       .card { padding: 32px 22px; }
-      .codebox { padding: 18px 18px; }
+      .codebox {
+        padding: 18px 18px;
+        font-size:0.8rem;
+      }
     }
 
     /* Reduced motion */
@@ -227,7 +233,7 @@
       .bg { opacity: 1 !important; transform: none !important; filter: none !important; animation: none !important; }
       .reveal { opacity: 1 !important; transform: none !important; animation: none !important; }
       .card::before { opacity: 1 !important; animation: none !important; }
-      .btn:hover, .btn:active { transform: none; }
+      .copy-btn:hover, .copy-btn:active { transform: none; }
     }
 
     ::selection { background: var(--accent); color: #000; }
@@ -253,7 +259,7 @@
     </pre>
 
     <button
-      class="btn reveal"
+      class="copy-btn reveal"
       type="button"
       onclick="copyCode()"
       style="--delay: calc(var(--base-delay) + var(--step-delay) * 3);">
@@ -269,12 +275,12 @@
   </main>
 
   <script>
-    // Fade-in trigger (match other pages)
+    // Fade-in trigger
     window.addEventListener('load', function () {
       document.body.classList.add('is-ready');
     });
 
-    // Title navigation (no URL in status bar because it's a button)
+    // Title navigation (button => no URL preview on hover)
     (function () {
       var titleBtn = document.querySelector('.title[data-href]');
       if (titleBtn) {
@@ -289,7 +295,7 @@
     function copyCode() {
       const text = document.getElementById('code').textContent;
       navigator.clipboard.writeText(text).then(() => {
-        const btn = document.querySelector('.btn');
+        const btn = document.querySelector('.copy-btn');
         const original = btn.textContent;
         btn.textContent = 'Copied!';
         setTimeout(() => btn.textContent = original, 2000);
