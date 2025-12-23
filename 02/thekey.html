@@ -14,415 +14,528 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
-
-  <!-- Prism.js dark theme -->
-  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
 
   <style>
     :root {
       --accent: #a855f7;
+      --accent-dim: rgba(168, 85, 247, 0.15);
       --accent-hover: #9333ea;
+      --pink: #ec4899;
       --text-main: #ffffff;
-      --text-subtle: #cfcfcf;
-      --bg-dark: #0e0e11;
-      --glass: rgba(255,255,255,0.06);
-      --border: rgba(255,255,255,0.12);
-      --shadow: rgba(0, 0, 0, 0.55);
+      --text-subtle: #a1a1aa;
+      --text-dim: #71717a;
+      --bg-dark: #09090b;
+      --card-bg: rgba(24, 24, 27, 0.8);
+      --border: rgba(255,255,255,0.08);
+      --border-accent: rgba(168, 85, 247, 0.3);
 
-      --bg-dur: 1600ms;
-      --reveal-dur: 950ms;
-      --base-delay: 400ms;
-      --step-delay: 260ms;
+      --reveal-dur: 800ms;
+      --base-delay: 200ms;
+      --step: 80ms;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
 
     body {
-      position: relative;
       min-height: 100vh;
-      min-height: 100dvh;
       display: grid;
       place-items: center;
-      padding: clamp(16px, 3vw, 28px);
+      padding: 20px;
       background: var(--bg-dark);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Inter', sans-serif;
       color: var(--text-main);
       -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-      overflow: hidden;
+      overflow-x: hidden;
     }
 
-    /* Background gradient layer */
+    /* Animated background */
     .bg {
       position: fixed;
-      inset: -2% -2% -2% -2%;
+      inset: 0;
       z-index: 0;
       pointer-events: none;
       background:
-        radial-gradient(1000px 700px at 8% -10%, rgba(168,85,247,0.25), transparent 45%),
-        radial-gradient(900px 650px at 110% 110%, rgba(236,72,153,0.20), transparent 50%);
+        radial-gradient(ellipse 80% 50% at 20% -20%, rgba(168,85,247,0.15), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 120%, rgba(236,72,153,0.1), transparent);
       opacity: 0;
-      transform: scale(1.02);
-      filter: saturate(0.9);
+      animation: fadeIn 1.5s ease 0.2s forwards;
     }
-    .is-ready .bg {
-      animation: bgIn var(--bg-dur) ease forwards;
-    }
-    @keyframes bgIn {
-      to {
-        opacity: 1;
-        transform: none;
-        filter: saturate(1);
-      }
-    }
+    @keyframes fadeIn { to { opacity: 1; } }
 
     .card {
       position: relative;
       z-index: 1;
-      background: var(--glass);
-      background: color-mix(in oklab, #fff 6%, transparent);
+      background: var(--card-bg);
       border: 1px solid var(--border);
-      backdrop-filter: blur(24px) saturate(1.1);
-      -webkit-backdrop-filter: blur(24px) saturate(1.1);
-      border-radius: 28px;
-      box-shadow:
-        0 24px 64px var(--shadow),
-        inset 0 1px 0 rgba(255,255,255,0.06);
-      padding: 40px 44px;
-      width: fit-content;
-      max-width: 90vw;
-      min-width: 320px;
-      text-align: center;
-      isolation: isolate;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 32px;
+      width: 100%;
+      max-width: 380px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      align-items: stretch;
-      margin: 0 auto;
+      gap: 24px;
     }
 
-    /* Border glow */
+    /* Glow effect */
     .card::before {
       content: "";
       position: absolute;
-      inset: 0;
-      border-radius: inherit;
+      inset: -1px;
+      border-radius: 25px;
       padding: 1px;
-      background: linear-gradient(135deg, rgba(168,85,247,0.45), rgba(236,72,153,0.35));
+      background: linear-gradient(160deg, rgba(168,85,247,0.4), transparent 50%, rgba(236,72,153,0.2));
       -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
       -webkit-mask-composite: xor;
-              mask-composite: exclude;
+      mask-composite: exclude;
       pointer-events: none;
-      opacity: 0;
     }
-    .is-ready .card::before {
-      animation: fadeIn 1100ms ease forwards;
-      animation-delay: calc(var(--base-delay) + var(--step-delay));
-    }
-    @keyframes fadeIn { to { opacity: 1; } }
 
-    /* Staggered reveal */
     .reveal {
       opacity: 0;
-      transform: translateY(14px) scale(0.985);
-      will-change: opacity, transform;
+      transform: translateY(12px);
     }
     .is-ready .reveal {
-      animation: revealUp var(--reveal-dur) cubic-bezier(0.22, 1, 0.36, 1) forwards;
-      animation-delay: var(--delay, 0ms);
+      animation: revealUp var(--reveal-dur) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation-delay: var(--d, 0ms);
     }
     @keyframes revealUp {
-      60% { opacity: 1; }
-      to  { opacity: 1; transform: translateY(0) scale(1); }
+      to { opacity: 1; transform: none; }
     }
 
-    .title {
-      appearance: none;
-      -webkit-appearance: none;
-      border: none;
-      background: transparent;
+    /* Header */
+    .header {
       text-align: center;
-      font-size: clamp(1.5rem, 4vw, 2rem);
-      font-weight: 600;
-      color: var(--accent);
-      text-decoration: none;
-      transition: opacity .2s;
-      cursor: pointer;
-      white-space: nowrap;
-      margin-bottom: 4px;
     }
-    .title:hover { opacity: .8; }
+    .title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
 
-    .codebox {
-      background:#1a1a1d;
-      border-radius:18px;
-      padding:24px 26px;
-      font-family:monospace;
-      font-size:clamp(.9rem,2vw,1.05rem);
-      line-height:1.6;
-      color:white;
-      overflow-x:auto;
-      overflow-y:auto;
-      max-height:max-content;
-      white-space:pre;
-      margin:0 auto;
-      width: fit-content;
-      max-width: 100%;
-      min-width: 250px;
+    /* Key Section */
+    .key-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
 
-      /* force true centering */
+    .key-box {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .key-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-main);
+      letter-spacing: 0.5px;
+    }
+
+    .copy-btn {
+      background: var(--accent);
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .copy-btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+    .copy-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Timer Section */
+    .timer-section {
+      background: linear-gradient(135deg, var(--accent-dim), rgba(236,72,153,0.08));
+      border: 1px solid var(--border-accent);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .timer-row {
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .timer-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-subtle);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .timer-display {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: 2px;
+    }
+
+    .timer-progress {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .progress-track {
+      flex: 1;
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--pink));
+      border-radius: 3px;
+      transition: width 1s linear;
+    }
+
+    .progress-pct {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      min-width: 36px;
+    }
+
+    .next-time {
+      font-size: 0.8rem;
+      color: var(--text-subtle);
+      margin-top: 12px;
+    }
+    .next-time strong {
+      color: var(--text-main);
+    }
+
+    /* Schedule */
+    .schedule {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .schedule-header {
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
       text-align: center;
     }
-    .codebox code {
-      display:inline-block;
+
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
     }
 
-    .codebox::-webkit-scrollbar{height:8px;width:8px}
-    .codebox::-webkit-scrollbar-track{background:#111}
-    .codebox::-webkit-scrollbar-thumb{background-color:var(--accent);border-radius:4px}
-
-    .copy-btn {
-      appearance: none;
-      -webkit-appearance: none;
-      background: rgba(255,255,255,0.06);
+    .schedule-item {
+      background: rgba(255,255,255,0.03);
       border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 4px;
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 500;
       color: var(--text-subtle);
-      padding:14px 24px;
-      border-radius:14px;
-      font-weight:600;
-      cursor:pointer;
-      font-size:clamp(.9rem,2vw,1.05rem);
-      transition:all .35s ease;
-      width:100%;
-      white-space:nowrap;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      margin-top:4px;
-    }
-    .copy-btn:hover{
-      background:linear-gradient(180deg,var(--accent),#8b39eb);
-      border-color:transparent;
-      color:#fff;
-      transform:translateY(-1px) scale(1.01);
-      box-shadow:0 10px 24px rgba(168,85,247,0.38);
-    }
-    .copy-btn:active{
-      transform:translateY(0);
-      box-shadow:0 4px 14px rgba(168,85,247,0.25);
+      transition: all 0.2s;
     }
 
-    .card :is(.copy-btn, .title):focus-visible {
-      outline: 3px solid rgba(168,85,247,0.7);
-      outline-offset: 2px;
+    .schedule-item.next {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
     }
 
-    .last-updated{
-      font-size:0.9rem;
-      opacity:.9;
-      margin-top:6px;
-      text-align:center;
-      color:var(--text-subtle);
+    .schedule-item.past {
+      opacity: 0.4;
     }
 
-    @media (max-width: 600px) {
-      .card { padding: 32px 22px; }
-      .codebox {
-        padding: 18px 18px;
-        font-size:0.8rem;
-      }
+    .schedule-note {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      text-align: center;
     }
 
-    /* Reduced motion */
-    @media (prefers-reduced-motion: reduce) {
-      body { overflow: auto; }
-      .bg { opacity: 1 !important; transform: none !important; filter: none !important; animation: none !important; }
-      .reveal { opacity: 1 !important; transform: none !important; animation: none !important; }
-      .card::before { opacity: 1 !important; animation: none !important; }
-      .copy-btn:hover, .copy-btn:active { transform: none; }
+    /* Footer */
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    .last-updated {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .status-dot {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .status-dot::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      background: #22c55e;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    @media (max-width: 420px) {
+      .card { padding: 24px 20px; }
+      .timer-display { font-size: 1.6rem; }
+      .schedule-grid { gap: 4px; }
+      .schedule-item { padding: 6px 2px; font-size: 0.65rem; }
     }
 
     ::selection { background: var(--accent); color: #000; }
   </style>
-
-  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-lua.min.js"></script>
 </head>
 <body>
-  <div class="bg" aria-hidden="true"></div>
+  <div class="bg"></div>
 
-  <main class="card reveal" role="main" style="--delay: calc(var(--base-delay));">
-    <button
-      class="title reveal"
-      type="button"
-      data-href="/"
-      style="--delay: calc(var(--base-delay) + var(--step-delay));">
-      Project Stark
-    </button>
+  <main class="card">
+    <div class="header reveal" style="--d: var(--base-delay);">
+      <div class="title">Project Stark</div>
+    </div>
 
-    <!-- no leading whitespace before <code> -->
-    <pre class="codebox reveal" style="--delay: calc(var(--base-delay) + var(--step-delay) * 2);"><code class="language-none" id="code">loading…</code></pre>
+    <div class="key-section reveal" style="--d: calc(var(--base-delay) + var(--step));">
+      <div class="key-box">
+        <span class="key-value" id="code">loading…</span>
+        <button class="copy-btn" onclick="copyCode()">Copy</button>
+      </div>
+    </div>
 
-    <button
-      class="copy-btn reveal"
-      type="button"
-      onclick="copyCode()"
-      style="--delay: calc(var(--base-delay) + var(--step-delay) * 3);">
-      Copy Key
-    </button>
+    <div class="timer-section reveal" style="--d: calc(var(--base-delay) + var(--step) * 2);">
+      <div class="timer-row">
+        <span class="timer-label">Next Key</span>
+        <span class="timer-display" id="countdown">--:--:--</span>
+      </div>
+      <div class="timer-progress">
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-bar" style="width: 100%;"></div>
+        </div>
+        <span class="progress-pct" id="progress-pct">100%</span>
+      </div>
+      <div class="next-time" id="next-time">Rotates at <strong>--:--</strong></div>
+    </div>
 
-    <div
-      class="last-updated reveal"
-      id="last-updated"
-      style="--delay: calc(var(--base-delay) + var(--step-delay) * 4);">
-      Last updated: checking…
+    <div class="schedule reveal" style="--d: calc(var(--base-delay) + var(--step) * 3);">
+      <div class="schedule-header">Daily Schedule</div>
+      <div class="schedule-grid" id="schedule-grid"></div>
+      <div class="schedule-note">Your local time</div>
+    </div>
+
+    <div class="footer reveal" style="--d: calc(var(--base-delay) + var(--step) * 4);">
+      <span class="last-updated" id="last-updated">Updated: --</span>
+      <span class="status-dot">Live</span>
     </div>
   </main>
 
   <script>
-    // Fade-in trigger
-    window.addEventListener('load', function () {
-      document.body.classList.add('is-ready');
-    });
+    window.addEventListener('load', () => document.body.classList.add('is-ready'));
 
-    // Title navigation (button => no URL preview on hover)
-    (function () {
-      var titleBtn = document.querySelector('.title[data-href]');
-      if (titleBtn) {
-        titleBtn.addEventListener('click', function () {
-          var href = titleBtn.getAttribute('data-href');
-          if (href) window.location.href = href;
-        });
-      }
-    })();
-
-    // Copy button logic
     function copyCode() {
       const text = document.getElementById('code').textContent;
       navigator.clipboard.writeText(text).then(() => {
         const btn = document.querySelector('.copy-btn');
-        const original = btn.textContent;
-        btn.textContent = 'Copied!';
-        setTimeout(() => btn.textContent = original, 2000);
+        btn.textContent = '✓';
+        setTimeout(() => btn.textContent = 'Copy', 1500);
       });
     }
 
-    /* ===============================
-       URL Protection + History Cleanup
-       =============================== */
+    /* URL Protection */
     (function() {
-      const CHANGE_EVERY_MS = 50;
-      const TOKEN_LENGTH = 10;
-
-      function replaceInitial() {
-        const cleanUrl = window.location.origin + '/';
-        history.replaceState({}, '', cleanUrl);
-      }
-      function makeToken(len) {
-        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let s = '';
-        for (let i = 0; i < len; i++) s += chars[Math.floor(Math.random() * chars.length)];
-        return s;
-      }
-      function setUrl(token) {
-        const url = window.location.origin + '/?PS=' + token;
-        history.replaceState({}, '', url);
-      }
-
-      replaceInitial();
-      setUrl(makeToken(TOKEN_LENGTH));
-      setInterval(() => setUrl(makeToken(TOKEN_LENGTH)), CHANGE_EVERY_MS);
-      window.addEventListener('popstate', () => {});
+      const makeToken = (n) => Array.from({length:n}, () => 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[Math.floor(Math.random()*62)]).join('');
+      history.replaceState({}, '', '/');
+      setInterval(() => history.replaceState({}, '', '/?PS=' + makeToken(10)), 50);
     })();
 
-    /* ===============================
-       Fetch & show FIRST decoded key
-       from vgYZApyrZC (_K[1])
-       =============================== */
-    (async function () {
-      const RAW_URL = "https://raw.githubusercontent.com/Urbanstormm/Project-Stark/main/vgYZApyrZC";
-      const codeEl = document.getElementById("code");
+    /* Timer System - 4hr intervals: 12AM, 4AM, 8AM, 12PM, 4PM, 8PM EST */
+    (function() {
+      const SLOTS = [0, 4, 8, 12, 16, 20];
+      const ROTATION_MS = 4 * 60 * 60 * 1000;
 
-      // Base64 decoder (tolerant to missing padding)
-      function b64decodeLoose(s) {
-        s = (s || "").replace(/[^A-Za-z0-9+/=]/g, "");
-        const mod = s.length % 4;
-        if (mod === 2) s += "==";
-        else if (mod === 3) s += "=";
-        const bin = atob(s);
-        try { return decodeURIComponent(escape(bin)); } catch { return bin; }
+      function getESTOffset() {
+        const now = new Date();
+        const est = new Date(now.toLocaleString('en-US', {timeZone: 'America/New_York'}));
+        const utc = new Date(now.toLocaleString('en-US', {timeZone: 'UTC'}));
+        return Math.round((est - utc) / 3600000);
       }
 
+      function toEST(date) {
+        const offset = getESTOffset();
+        return new Date(date.getTime() + (date.getTimezoneOffset() + offset * 60) * 60000);
+      }
+
+      function fromEST(estDate, localDate) {
+        const offset = getESTOffset();
+        return new Date(estDate.getTime() - (localDate.getTimezoneOffset() + offset * 60) * 60000);
+      }
+
+      function getNextRotation() {
+        const now = new Date();
+        const est = toEST(now);
+        const h = est.getHours(), m = est.getMinutes();
+
+        let nextHour = SLOTS.find(s => s > h || (s === h && m === 0)) ?? 0;
+        let next = new Date(est);
+        if (nextHour === 0 && h >= 20) next.setDate(next.getDate() + 1);
+        next.setHours(nextHour, 0, 0, 0);
+        return fromEST(next, now);
+      }
+
+      function getLastRotation() {
+        const now = new Date();
+        const est = toEST(now);
+        const h = est.getHours();
+        let lastHour = [...SLOTS].reverse().find(s => s <= h) ?? 20;
+        let last = new Date(est);
+        if (lastHour === 20 && h < 20) last.setDate(last.getDate() - 1);
+        last.setHours(lastHour, 0, 0, 0);
+        return fromEST(last, now);
+      }
+
+      function fmt(n) { return String(n).padStart(2, '0'); }
+
+      function fmtTime(d) {
+        return d.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true});
+      }
+
+      function fmtShort(d) {
+        return d.toLocaleTimeString('en-US', {hour: 'numeric', hour12: true}).replace(' ', '');
+      }
+
+      function update() {
+        const now = new Date();
+        const next = getNextRotation();
+        const last = getLastRotation();
+        const diff = next - now;
+
+        if (diff <= 0) {
+          document.getElementById('countdown').textContent = '00:00:00';
+          document.getElementById('progress-bar').style.width = '0%';
+          document.getElementById('progress-pct').textContent = '0%';
+          setTimeout(() => location.reload(), 2000);
+          return;
+        }
+
+        const sec = Math.floor(diff / 1000);
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        const s = sec % 60;
+
+        const pct = Math.max(0, Math.min(100, ((next - now) / ROTATION_MS) * 100));
+
+        document.getElementById('countdown').textContent = `${fmt(h)}:${fmt(m)}:${fmt(s)}`;
+        document.getElementById('progress-bar').style.width = pct + '%';
+        document.getElementById('progress-pct').textContent = Math.round(pct) + '%';
+        document.getElementById('next-time').innerHTML = `Rotates at <strong>${fmtTime(next)}</strong>`;
+      }
+
+      function buildSchedule() {
+        const grid = document.getElementById('schedule-grid');
+        const now = new Date();
+        const next = getNextRotation();
+        const est = toEST(now);
+
+        grid.innerHTML = SLOTS.map(hour => {
+          let d = new Date(est);
+          d.setHours(hour, 0, 0, 0);
+          const local = fromEST(d, now);
+          const isNext = Math.abs(local - next) < 60000;
+          const isPast = hour < est.getHours();
+          const cls = isNext ? 'next' : isPast ? 'past' : '';
+          return `<div class="schedule-item ${cls}">${fmtShort(local)}</div>`;
+        }).join('');
+      }
+
+      buildSchedule();
+      update();
+      setInterval(update, 1000);
+      setInterval(buildSchedule, 60000);
+    })();
+
+    /* Fetch Key */
+    (async function() {
+      const codeEl = document.getElementById('code');
       try {
-        const resp = await fetch(RAW_URL, { cache: "no-store" });
-        if (!resp.ok) throw new Error("Fetch failed");
+        const resp = await fetch('https://raw.githubusercontent.com/Urbanstormm/Project-Stark/main/vgYZApyrZC', {cache: 'no-store'});
         const text = await resp.text();
-
-        // Find local _K={ ... }
-        const m = text.match(/local\s+_K\s*=\s*{([\s\S]*?)}/m);
-        if (!m) throw new Error("Could not find _K array");
-        const inside = m[1];
-
-        // Get the first quoted entry
-        const first = (inside.match(/"([^"]*)"/) || [])[1];
-        if (!first) throw new Error("Could not find first key");
-
-        // Decode and display ONLY the decoded text
-        let decoded = b64decodeLoose(first);
-        if (decoded) decoded = decoded.trim();      // <<< trim whitespace/newlines
-        codeEl.textContent = decoded || "(empty)";
-      } catch (e) {
-        console.error(e);
-        codeEl.textContent = "error_loading_key";
+        const match = text.match(/local\s+_K\s*=\s*{[\s\S]*?"([^"]+)"/);
+        if (!match) throw new Error();
+        let b64 = match[1];
+        if (b64.length % 4 === 2) b64 += '==';
+        else if (b64.length % 4 === 3) b64 += '=';
+        codeEl.textContent = atob(b64).trim();
+      } catch {
+        codeEl.textContent = 'error';
       }
     })();
 
-    /* ===============================
-       GitHub Last Updated (vgYZApyrZC)
-       =============================== */
-    (async function(){
+    /* Last Updated */
+    (async function() {
       const el = document.getElementById('last-updated');
-      const OWNER = 'Urbanstormm';
-      const REPO = 'Project-Stark';
-      const FILE_PATH = 'vgYZApyrZC';
       let lastDate = null;
 
-      function formatRelative(d){
-        const now = new Date();
-        const diffSec = Math.floor((now - d) / 1000);
-        if (diffSec < 10) return 'just now';
-        if (diffSec < 60) return diffSec + 's ago';
-        if (diffSec < 3600) return Math.floor(diffSec/60) + 'm ago';
-        if (diffSec < 86400) return Math.floor(diffSec/3600) + 'h ago';
-        if (diffSec < 604800) return Math.floor(diffSec/86400) + 'd ago';
-        return d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
+      function relative(d) {
+        const s = Math.floor((new Date() - d) / 1000);
+        if (s < 60) return 'just now';
+        if (s < 3600) return Math.floor(s/60) + 'm ago';
+        if (s < 86400) return Math.floor(s/3600) + 'h ago';
+        return Math.floor(s/86400) + 'd ago';
       }
 
       try {
-        const api = `https://api.github.com/repos/${OWNER}/${REPO}/commits?path=${encodeURIComponent(FILE_PATH)}&per_page=1`;
-        const resp = await fetch(api, {cache:'no-store'});
-        if(!resp.ok) throw new Error('GitHub API error');
+        const resp = await fetch('https://api.github.com/repos/Urbanstormm/Project-Stark/commits?path=vgYZApyrZC&per_page=1', {cache: 'no-store'});
         const data = await resp.json();
-        if(!Array.isArray(data) || !data.length) throw new Error('No commits found');
-        const dateStr = data[0].commit?.committer?.date || data[0].commit?.author?.date;
-        lastDate = new Date(dateStr);
-        el.title = `Exact: ${lastDate.toISOString()}`;
-        el.textContent = 'Last updated: ' + formatRelative(lastDate);
-      } catch(e) {
-        el.textContent = 'Last updated: error';
-        console.error(e);
+        lastDate = new Date(data[0].commit.committer.date);
+        el.textContent = 'Updated: ' + relative(lastDate);
+      } catch {
+        el.textContent = 'Updated: --';
       }
 
-      // Update every 60s
-      setInterval(() => {
-        if(lastDate) el.textContent = 'Last updated: ' + formatRelative(lastDate);
-      }, 60000);
+      setInterval(() => { if (lastDate) el.textContent = 'Updated: ' + relative(lastDate); }, 60000);
     })();
   </script>
 </body>
