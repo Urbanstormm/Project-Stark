@@ -19,7 +19,7 @@ local Services = {
     Players = cloneref(game:GetService("Players"))
 }
 
--- Font Definitions (to avoid Enum.Font issues)
+-- Font Definitions
 local Fonts = {
     Ubuntu = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal),
     UbuntuBold = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
@@ -45,7 +45,7 @@ getgenv().MelatoninUIConfig = getgenv().MelatoninUIConfig or {
 }
 
 local Config = getgenv().MelatoninUIConfig
-Config.TweenTime = 0.25
+Config.TweenTime = 0.3
 
 -- Utility Functions
 local function Create(class, props, children)
@@ -63,11 +63,19 @@ local function Create(class, props, children)
 end
 
 local function Tween(instance, props, duration, style, direction)
-    if not instance or not instance.Parent then return end
-    local info = TweenInfo.new(duration or Config.TweenTime, style or Enum.EasingStyle.Quint, direction or Enum.EasingDirection.Out)
+    if not instance or not instance.Parent then return nil end
+    local info = TweenInfo.new(
+        duration or Config.TweenTime, 
+        style or Enum.EasingStyle.Quart, 
+        direction or Enum.EasingDirection.Out
+    )
     local tween = Services.Tween:Create(instance, info, props)
     tween:Play()
     return tween
+end
+
+local function SmoothTween(instance, props, duration)
+    return Tween(instance, props, duration, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
 end
 
 -- Clean up old instances
@@ -98,7 +106,7 @@ local function CreateMainUI()
         Parent = mainGui
     })
     
-    -- Top Bar
+    -- Top Bar (Drag Handle)
     local topBar = Create("Frame", {
         Name = "TopLabels",
         BackgroundColor3 = Config.Theme.SecondaryBG,
@@ -126,9 +134,9 @@ local function CreateMainUI()
         Create("TextButton", {
             Name = "Close",
             FontFace = Fonts.Ubuntu,
-            Text = "X",
+            Text = "×",
             TextColor3 = Config.Theme.Text,
-            TextSize = 14,
+            TextSize = 18,
             TextTransparency = 0.4,
             AutoButtonColor = false,
             BackgroundTransparency = 1,
@@ -138,12 +146,12 @@ local function CreateMainUI()
     })
     
     -- Games List
-    local gamesHolder = Create("ScrollingFrame", {
+    Create("ScrollingFrame", {
         Name = "GamesHolder",
         AutomaticCanvasSize = Enum.AutomaticSize.Y,
-        ScrollBarThickness = 2,
+        ScrollBarThickness = 3,
         ScrollBarImageColor3 = Config.Theme.Accent,
-        ScrollBarImageTransparency = 0.5,
+        ScrollBarImageTransparency = 0.3,
         TopImage = "",
         BottomImage = "",
         MidImage = "rbxassetid://7445543667",
@@ -152,15 +160,16 @@ local function CreateMainUI()
         Position = UDim2.fromOffset(7, 41),
         Size = UDim2.fromOffset(344, 213),
         ClipsDescendants = true,
+        CanvasSize = UDim2.new(0, 0, 0, 0),
         Parent = mainFrame
     }, {
         Create("UIListLayout", {Padding = UDim.new(0, 2), SortOrder = Enum.SortOrder.LayoutOrder}),
-        Create("UIPadding", {PaddingTop = UDim.new(0, 2), PaddingBottom = UDim.new(0, 2)}),
+        Create("UIPadding", {PaddingTop = UDim.new(0, 2), PaddingBottom = UDim.new(0, 2), PaddingLeft = UDim.new(0, 2), PaddingRight = UDim.new(0, 2)}),
         Create("UIStroke", {Color = Config.Theme.Stroke, Thickness = 1})
     })
     
     -- Load Button Frame
-    local loadFrame = Create("Frame", {
+    Create("Frame", {
         Name = "LoadFrame",
         BackgroundColor3 = Config.Theme.PrimaryBG,
         BorderSizePixel = 0,
@@ -201,11 +210,11 @@ local function CreateLoadingUI()
         BorderSizePixel = 0,
         Position = UDim2.fromScale(0.5, 0.5),
         AnchorPoint = Vector2.new(0.5, 0.5),
-        Size = UDim2.fromOffset(148, 133),
+        Size = UDim2.fromOffset(160, 145),
         Parent = loadingGui
     })
     
-    -- Top Bar
+    -- Top Bar (Drag Handle)
     Create("Frame", {
         Name = "TopLabels",
         BackgroundColor3 = Config.Theme.SecondaryBG,
@@ -229,22 +238,6 @@ local function CreateLoadingUI()
             BorderSizePixel = 0,
             Position = UDim2.new(0, 0, 1, -2),
             Size = UDim2.new(1, 0, 0, 2)
-        }),
-        Create("Frame", {
-            Name = "BackgroundLoadBar",
-            BackgroundColor3 = Config.Theme.SecondaryBG,
-            BorderSizePixel = 0,
-            Position = UDim2.new(0.12, 0, 1, 8),
-            Size = UDim2.new(0.76, 0, 0, 3)
-        }, {
-            Create("Frame", {
-                Name = "LoadingLine",
-                BackgroundColor3 = Config.Theme.Accent,
-                BorderSizePixel = 0,
-                Size = UDim2.new(0, 0, 1, 0)
-            }, {
-                Create("UICorner", {CornerRadius = UDim.new(1, 0)})
-            })
         })
     })
     
@@ -254,9 +247,57 @@ local function CreateLoadingUI()
         Image = Config.Logos.MelaLogo,
         ScaleType = Enum.ScaleType.Fit,
         BackgroundTransparency = 1,
-        Position = UDim2.fromScale(0.5, 0.6),
+        Position = UDim2.new(0.5, 0, 0.45, 0),
         AnchorPoint = Vector2.new(0.5, 0.5),
-        Size = UDim2.fromOffset(69, 56),
+        Size = UDim2.fromOffset(60, 50),
+        Parent = window
+    })
+    
+    -- Loading Bar at Bottom
+    Create("Frame", {
+        Name = "LoadBarContainer",
+        BackgroundColor3 = Config.Theme.SecondaryBG,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0.5, 0, 1, -18),
+        AnchorPoint = Vector2.new(0.5, 0),
+        Size = UDim2.new(0.8, 0, 0, 4),
+        Parent = window
+    }, {
+        Create("UICorner", {CornerRadius = UDim.new(1, 0)}),
+        Create("Frame", {
+            Name = "LoadingLine",
+            BackgroundColor3 = Config.Theme.Accent,
+            BorderSizePixel = 0,
+            Size = UDim2.new(0, 0, 1, 0)
+        }, {
+            Create("UICorner", {CornerRadius = UDim.new(1, 0)}),
+            Create("UIGradient", {
+                Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(200, 200, 255)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+                }),
+                Transparency = NumberSequence.new({
+                    NumberSequenceKeypoint.new(0, 0.3),
+                    NumberSequenceKeypoint.new(0.5, 0),
+                    NumberSequenceKeypoint.new(1, 0.3)
+                })
+            })
+        })
+    })
+    
+    -- Loading Text
+    Create("TextLabel", {
+        Name = "LoadingText",
+        FontFace = Fonts.Ubuntu,
+        Text = "Loading...",
+        TextColor3 = Config.Theme.Text,
+        TextSize = 11,
+        TextTransparency = 0.5,
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0.5, 0, 1, -32),
+        AnchorPoint = Vector2.new(0.5, 0),
+        Size = UDim2.new(0.8, 0, 0, 14),
         Parent = window
     })
     
@@ -329,6 +370,17 @@ local function CreateGameFrameTemplate()
         Parent = frame
     }, {Create("UICorner", {CornerRadius = UDim.new(0, 3)})})
     
+    -- Selection indicator (left accent bar)
+    Create("Frame", {
+        Name = "SelectionIndicator",
+        BackgroundColor3 = Config.Theme.Accent,
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 0, 0.1, 0),
+        Size = UDim2.new(0, 3, 0.8, 0),
+        Parent = frame
+    }, {Create("UICorner", {CornerRadius = UDim.new(1, 0)})})
+    
     return frame
 end
 
@@ -350,11 +402,12 @@ local LoaderHandler = {
 
 getgenv().ActiveFrame = nil
 local ActiveTargets = nil
+local DragConnections = {}
 
 -- Hover Styles
 local Styles = {
     Enter = {
-        Frame = {BackgroundTransparency = 0},
+        Frame = {BackgroundTransparency = 0.1},
         GameName = {TextTransparency = 0, TextColor3 = Config.Theme.GameName},
         UpdateStatus = {TextTransparency = 0.2},
         SubTime = {TextTransparency = 0.2, BackgroundTransparency = 0.3},
@@ -366,6 +419,14 @@ local Styles = {
         UpdateStatus = {TextTransparency = 0.5},
         SubTime = {TextTransparency = 0.5, BackgroundTransparency = 0.5},
         ImageLabel = {ImageTransparency = 0.4}
+    },
+    Selected = {
+        Frame = {BackgroundTransparency = 0},
+        GameName = {TextTransparency = 0, TextColor3 = Config.Theme.GameName},
+        UpdateStatus = {TextTransparency = 0.1},
+        SubTime = {TextTransparency = 0.1, BackgroundTransparency = 0.2},
+        ImageLabel = {ImageTransparency = 0},
+        SelectionIndicator = {BackgroundTransparency = 0}
     }
 }
 
@@ -373,7 +434,7 @@ function Melatonin.ApplyStyle(targets, style, duration)
     for name, props in pairs(style) do
         local instance = targets[name]
         if instance and instance.Parent then
-            Tween(instance, props, duration)
+            SmoothTween(instance, props, duration or 0.2)
         end
     end
 end
@@ -384,47 +445,50 @@ function Melatonin.SetupFrameInteraction(frame)
         GameName = frame:FindFirstChild("GameName"),
         UpdateStatus = frame:FindFirstChild("UpdateStatus"),
         SubTime = frame:FindFirstChild("SubTime"),
-        ImageLabel = frame:FindFirstChild("ImageLabel")
+        ImageLabel = frame:FindFirstChild("ImageLabel"),
+        SelectionIndicator = frame:FindFirstChild("SelectionIndicator")
     }
     
+    local isHovering = false
+    
     frame.MouseEnter:Connect(function()
+        isHovering = true
         if getgenv().ActiveFrame ~= frame then
             Melatonin.ApplyStyle(targets, Styles.Enter, 0.15)
         end
     end)
     
     frame.MouseLeave:Connect(function()
+        isHovering = false
         if getgenv().ActiveFrame ~= frame then
-            Melatonin.ApplyStyle(targets, Styles.Leave, 0.2)
+            Melatonin.ApplyStyle(targets, Styles.Leave, 0.25)
         end
     end)
     
     frame.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            -- Deselect previous frame
             if getgenv().ActiveFrame and getgenv().ActiveFrame ~= frame and ActiveTargets then
-                Melatonin.ApplyStyle(ActiveTargets, Styles.Leave, 0.15)
+                local prevIndicator = ActiveTargets.SelectionIndicator
+                if prevIndicator then
+                    SmoothTween(prevIndicator, {BackgroundTransparency = 1}, 0.2)
+                end
+                Melatonin.ApplyStyle(ActiveTargets, Styles.Leave, 0.2)
             end
+            
+            -- Select new frame
             getgenv().ActiveFrame = frame
             ActiveTargets = targets
-            Melatonin.ApplyStyle(targets, Styles.Enter, 0.1)
             
-            -- Click ripple effect
-            local ripple = Create("Frame", {
-                BackgroundColor3 = Config.Theme.Accent,
-                BackgroundTransparency = 0.7,
-                Position = UDim2.new(0, 0, 0.5, 0),
-                AnchorPoint = Vector2.new(0, 0.5),
-                Size = UDim2.new(0, 3, 0.8, 0),
-                Parent = frame
-            }, {Create("UICorner", {CornerRadius = UDim.new(1, 0)})})
+            -- Apply selected style with smooth animation
+            Melatonin.ApplyStyle(targets, Styles.Selected, 0.15)
             
-            Tween(ripple, {Size = UDim2.new(0, 5, 1, 0), BackgroundTransparency = 0.5}, 0.15)
-            task.delay(0.15, function()
-                local t = Tween(ripple, {BackgroundTransparency = 1}, 0.3)
-                if t then
-                    t.Completed:Once(function()
-                        if ripple and ripple.Parent then ripple:Destroy() end
-                    end)
+            -- Scale animation for feedback
+            local originalSize = frame.Size
+            SmoothTween(frame, {Size = UDim2.new(originalSize.X.Scale, originalSize.X.Offset - 4, originalSize.Y.Scale, originalSize.Y.Offset)}, 0.08)
+            task.delay(0.08, function()
+                if frame and frame.Parent then
+                    SmoothTween(frame, {Size = originalSize}, 0.15)
                 end
             end)
         end
@@ -433,83 +497,113 @@ end
 
 function Melatonin.SetupButtonHover(button, hoverProps, normalProps)
     if not button then return end
+    
     button.MouseEnter:Connect(function()
-        Tween(button, hoverProps, 0.12)
+        SmoothTween(button, hoverProps, 0.15)
     end)
+    
     button.MouseLeave:Connect(function()
-        Tween(button, normalProps, 0.15)
+        SmoothTween(button, normalProps, 0.2)
     end)
 end
 
 function Melatonin.CloseGuiEffect(screenGui)
     if not screenGui or not screenGui.Parent then return end
     
-    local descendants = screenGui:GetDescendants()
+    -- Find main frame for scale animation
+    local mainFrame = screenGui:FindFirstChild("Main") or screenGui:FindFirstChild("LoadingWindow")
     
-    for i, obj in ipairs(descendants) do
-        local delay = math.min(i * 0.006, 0.3)
-        task.delay(delay, function()
-            if not obj or not obj.Parent then return end
-            if obj:IsA("GuiObject") then
-                local props = {BackgroundTransparency = 1}
-                if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
-                    props.TextTransparency = 1
-                end
-                if obj:IsA("ImageLabel") or obj:IsA("ImageButton") then
-                    props.ImageTransparency = 1
-                end
-                Tween(obj, props, 0.3, Enum.EasingStyle.Quad)
-            elseif obj:IsA("UIStroke") then
-                Tween(obj, {Transparency = 1}, 0.3)
-            end
-        end)
+    if mainFrame then
+        -- Smooth scale down and fade
+        Tween(mainFrame, {
+            Size = UDim2.new(mainFrame.Size.X.Scale * 0.95, mainFrame.Size.X.Offset * 0.95, mainFrame.Size.Y.Scale * 0.95, mainFrame.Size.Y.Offset * 0.95),
+            BackgroundTransparency = 1
+        }, 0.35, Enum.EasingStyle.Back, Enum.EasingDirection.In)
     end
     
-    task.delay(0.5, function()
+    local descendants = screenGui:GetDescendants()
+    
+    for _, obj in ipairs(descendants) do
+        if obj:IsA("GuiObject") then
+            local props = {BackgroundTransparency = 1}
+            if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
+                props.TextTransparency = 1
+            end
+            if obj:IsA("ImageLabel") or obj:IsA("ImageButton") then
+                props.ImageTransparency = 1
+            end
+            SmoothTween(obj, props, 0.3)
+        elseif obj:IsA("UIStroke") then
+            SmoothTween(obj, {Transparency = 1}, 0.3)
+        end
+    end
+    
+    task.delay(0.4, function()
         if screenGui and screenGui.Parent then
             screenGui:Destroy()
         end
     end)
 end
 
-function Melatonin.MakeDraggable(frame)
-    if not frame then return end
+-- Fixed draggable function - only drags from the top bar
+function Melatonin.MakeDraggable(mainFrame, dragHandle)
+    if not mainFrame or not dragHandle then return end
     
-    local dragging, dragStart, startPos = false, nil, nil
+    local dragging = false
+    local dragStart = nil
+    local frameStart = nil
     
-    frame.InputBegan:Connect(function(input)
+    -- Only start drag from the handle (top bar)
+    dragHandle.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
             dragStart = Services.UserInput:GetMouseLocation()
-            startPos = frame.Position
-            
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
+            frameStart = mainFrame.AbsolutePosition
         end
     end)
     
-    Services.RunService.RenderStepped:Connect(function(dt)
-        if dragging and startPos then
-            local mouse = Services.UserInput:GetMouseLocation()
-            local delta = mouse - dragStart
-            local viewport = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920, 1080)
-            local size = frame.AbsoluteSize
-            local anchor = frame.AnchorPoint
-            
-            local newX = startPos.X.Offset + delta.X
-            local newY = startPos.Y.Offset + delta.Y
-            
-            newX = math.clamp(newX, -size.X * anchor.X, viewport.X - size.X * (1 - anchor.X))
-            newY = math.clamp(newY, -size.Y * anchor.Y, viewport.Y - size.Y * (1 - anchor.Y))
-            
-            local currentPos = frame.Position
-            local targetPos = UDim2.fromOffset(newX, newY)
-            frame.Position = currentPos:Lerp(targetPos, math.min(1, dt * 20))
+    dragHandle.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
         end
     end)
+    
+    Services.UserInput.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    
+    local connection = Services.RunService.RenderStepped:Connect(function(dt)
+        if dragging and frameStart and dragStart then
+            local mouse = Services.UserInput:GetMouseLocation()
+            local delta = mouse - dragStart
+            
+            local viewport = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920, 1080)
+            local size = mainFrame.AbsoluteSize
+            local anchor = mainFrame.AnchorPoint
+            
+            local targetX = frameStart.X + delta.X + (size.X * anchor.X)
+            local targetY = frameStart.Y + delta.Y + (size.Y * anchor.Y)
+            
+            -- Clamp to screen bounds
+            targetX = math.clamp(targetX, size.X * anchor.X, viewport.X - size.X * (1 - anchor.X))
+            targetY = math.clamp(targetY, size.Y * anchor.Y, viewport.Y - size.Y * (1 - anchor.Y))
+            
+            -- Smooth lerp for fluid movement
+            local currentPos = mainFrame.Position
+            local targetPos = UDim2.new(0, targetX, 0, targetY)
+            
+            local lerpSpeed = math.min(1, dt * 18)
+            local newX = currentPos.X.Offset + (targetPos.X.Offset - currentPos.X.Offset) * lerpSpeed
+            local newY = currentPos.Y.Offset + (targetPos.Y.Offset - currentPos.Y.Offset) * lerpSpeed
+            
+            mainFrame.Position = UDim2.fromOffset(newX, newY)
+        end
+    end)
+    
+    table.insert(DragConnections, connection)
+    return connection
 end
 
 function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, gameFrameTemplate, callback)
@@ -523,11 +617,18 @@ function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, g
     
     local playerGui = player:WaitForChild("PlayerGui")
     
+    -- Cleanup existing
     for _, gui in ipairs(playerGui:GetChildren()) do
         if gui.Name == "Melatonin" or gui.Name == "MelatoninLoading" then
             gui:Destroy()
         end
     end
+    
+    -- Disconnect old drag connections
+    for _, conn in ipairs(DragConnections) do
+        if conn then conn:Disconnect() end
+    end
+    DragConnections = {}
     
     local loadingClone = LoadingUI:Clone()
     loadingClone.Parent = playerGui
@@ -540,32 +641,73 @@ function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, g
     end
     
     local topLabels = window:FindFirstChild("TopLabels")
-    local loadBarBG = topLabels and topLabels:FindFirstChild("BackgroundLoadBar")
-    local loadBar = loadBarBG and loadBarBG:FindFirstChild("LoadingLine")
+    local loadBarContainer = window:FindFirstChild("LoadBarContainer")
+    local loadBar = loadBarContainer and loadBarContainer:FindFirstChild("LoadingLine")
     local logo = window:FindFirstChild("MelaLogo")
+    local loadingText = window:FindFirstChild("LoadingText")
     
-    Melatonin.MakeDraggable(window)
+    -- Make draggable from top bar only
+    Melatonin.MakeDraggable(window, topLabels)
     
+    -- Initial state - invisible
     window.BackgroundTransparency = 1
     if logo then logo.ImageTransparency = 1 end
+    if loadingText then loadingText.TextTransparency = 1 end
+    if loadBarContainer then loadBarContainer.BackgroundTransparency = 1 end
     
-    Tween(window, {BackgroundTransparency = 0}, 0.4, Enum.EasingStyle.Quint)
-    if logo then Tween(logo, {ImageTransparency = 0}, 0.5, Enum.EasingStyle.Quint) end
+    -- Entrance animation
+    window.Size = UDim2.fromOffset(140, 125)
+    Tween(window, {BackgroundTransparency = 0, Size = UDim2.fromOffset(160, 145)}, 0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
     
+    task.delay(0.15, function()
+        if logo then 
+            Tween(logo, {ImageTransparency = 0}, 0.4, Enum.EasingStyle.Quart) 
+        end
+    end)
+    
+    task.delay(0.25, function()
+        if loadingText then 
+            Tween(loadingText, {TextTransparency = 0.5}, 0.3, Enum.EasingStyle.Quart) 
+        end
+        if loadBarContainer then
+            Tween(loadBarContainer, {BackgroundTransparency = 0}, 0.3, Enum.EasingStyle.Quart)
+        end
+    end)
+    
+    -- Pulsing logo animation
     local pulseConnection
     if logo then
-        local originalSize = logo.Size
+        local baseSize = UDim2.fromOffset(60, 50)
         pulseConnection = Services.RunService.RenderStepped:Connect(function()
             if logo and logo.Parent then
-                local pulse = 1 + math.sin(tick() * 3) * 0.03
-                logo.Size = UDim2.fromOffset(originalSize.X.Offset * pulse, originalSize.Y.Offset * pulse)
+                local pulse = 1 + math.sin(tick() * 2.5) * 0.04
+                logo.Size = UDim2.fromOffset(baseSize.X.Offset * pulse, baseSize.Y.Offset * pulse)
             end
         end)
     end
     
+    -- Loading bar animation with smooth easing
     if loadBar then
-        task.delay(0.2, function()
-            Tween(loadBar, {Size = UDim2.new(1, 0, 1, 0)}, duration - 0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
+        task.delay(0.4, function()
+            Tween(loadBar, {Size = UDim2.new(1, 0, 1, 0)}, duration - 0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+        end)
+    end
+    
+    -- Update loading text
+    if loadingText then
+        local dots = 0
+        local textConnection
+        textConnection = Services.RunService.Heartbeat:Connect(function()
+            if loadingText and loadingText.Parent then
+                dots = (dots % 3) + 1
+                loadingText.Text = "Loading" .. string.rep(".", dots)
+            else
+                textConnection:Disconnect()
+            end
+        end)
+        
+        task.delay(duration, function()
+            textConnection:Disconnect()
         end)
     end
     
@@ -574,6 +716,7 @@ function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, g
         Melatonin.CloseGuiEffect(loadingClone)
         
         task.delay(0.5, function()
+            -- Reset state
             getgenv().ActiveFrame = nil
             ActiveTargets = nil
             LoaderHandler.FrameData = {}
@@ -598,12 +741,50 @@ function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, g
             local loadBtn = loadFrame and loadFrame:FindFirstChild("Load")
             local closeBtn = topLabelsMain and topLabelsMain:FindFirstChild("Close")
             
-            Melatonin.MakeDraggable(mainFrame)
+            -- Make draggable from top bar only
+            Melatonin.MakeDraggable(mainFrame, topLabelsMain)
             
-            mainFrame.Position = UDim2.fromScale(0.5, 0.55)
+            -- Entrance animation
+            mainFrame.Position = UDim2.fromScale(0.5, 0.5)
+            mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+            mainFrame.Size = UDim2.fromOffset(340, 280)
             mainFrame.BackgroundTransparency = 1
-            Tween(mainFrame, {Position = UDim2.fromScale(0.5, 0.5), BackgroundTransparency = 0}, 0.5, Enum.EasingStyle.Back)
             
+            Tween(mainFrame, {
+                Size = UDim2.fromOffset(358, 297), 
+                BackgroundTransparency = 0
+            }, 0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+            
+            -- Fade in children
+            for _, child in ipairs(mainFrame:GetDescendants()) do
+                if child:IsA("GuiObject") then
+                    local originalBG = child.BackgroundTransparency
+                    if originalBG < 1 then
+                        child.BackgroundTransparency = 1
+                        task.delay(0.1, function()
+                            SmoothTween(child, {BackgroundTransparency = originalBG}, 0.35)
+                        end)
+                    end
+                    
+                    if child:IsA("TextLabel") or child:IsA("TextButton") then
+                        local originalText = child.TextTransparency
+                        child.TextTransparency = 1
+                        task.delay(0.15, function()
+                            SmoothTween(child, {TextTransparency = originalText}, 0.3)
+                        end)
+                    end
+                    
+                    if child:IsA("ImageLabel") then
+                        local originalImg = child.ImageTransparency
+                        child.ImageTransparency = 1
+                        task.delay(0.15, function()
+                            SmoothTween(child, {ImageTransparency = originalImg}, 0.3)
+                        end)
+                    end
+                end
+            end
+            
+            -- Button hover effects
             if loadBtn then
                 Melatonin.SetupButtonHover(loadBtn, 
                     {TextTransparency = 0, TextColor3 = Config.Theme.Accent},
@@ -613,6 +794,12 @@ function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, g
                 loadBtn.MouseButton1Click:Connect(function()
                     local active = getgenv().ActiveFrame
                     if not active then return end
+                    
+                    -- Button press animation
+                    SmoothTween(loadBtn, {TextTransparency = 0.2}, 0.05)
+                    task.delay(0.05, function()
+                        SmoothTween(loadBtn, {TextTransparency = 0}, 0.1)
+                    end)
                     
                     local frameCallback = LoaderHandler.FrameCallbacks[active]
                     if typeof(frameCallback) == "function" then
@@ -632,8 +819,8 @@ function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, g
             
             if closeBtn then
                 Melatonin.SetupButtonHover(closeBtn,
-                    {TextTransparency = 0, TextColor3 = Color3.fromRGB(255, 100, 100)},
-                    {TextTransparency = 0.4, TextColor3 = Config.Theme.Text}
+                    {TextTransparency = 0, TextColor3 = Color3.fromRGB(255, 100, 100), Rotation = 90},
+                    {TextTransparency = 0.4, TextColor3 = Config.Theme.Text, Rotation = 0}
                 )
                 
                 closeBtn.MouseButton1Click:Connect(function()
@@ -641,24 +828,41 @@ function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, g
                 end)
             end
             
+            -- Create game frames with staggered animation
             if gamesHolder then
                 for i, config in ipairs(frameConfigs or {}) do
-                    task.delay(i * 0.08, function()
+                    task.delay(0.1 + (i * 0.1), function()
                         local frame = gameFrameTemplate:Clone()
                         frame.Name = "GameFrame_" .. i
                         frame.Parent = gamesHolder
+                        
+                        -- Initial hidden state
                         frame.BackgroundTransparency = 1
+                        frame.Position = UDim2.new(-0.15, 0, 0, 0)
                         
                         local icon = frame:FindFirstChild("ImageLabel")
                         local gameName = frame:FindFirstChild("GameName")
                         local status = frame:FindFirstChild("UpdateStatus")
                         local subTime = frame:FindFirstChild("SubTime")
+                        local indicator = frame:FindFirstChild("SelectionIndicator")
                         
+                        -- Hide children initially
+                        if icon then icon.ImageTransparency = 1 end
+                        if gameName then gameName.TextTransparency = 1 end
+                        if status then status.TextTransparency = 1 end
+                        if subTime then 
+                            subTime.TextTransparency = 1 
+                            subTime.BackgroundTransparency = 1
+                        end
+                        if indicator then indicator.BackgroundTransparency = 1 end
+                        
+                        -- Set content
                         if icon then icon.Image = config.Image or "" end
                         if gameName then gameName.Text = config.GameName or "Game" end
                         if status then status.Text = config.Status or "Unknown" end
                         if subTime then subTime.Text = config.SubTime or "N/A" end
                         
+                        -- Apply custom properties
                         if config.Properties then
                             for childName, props in pairs(config.Properties) do
                                 local child = frame:FindFirstChild(childName)
@@ -670,6 +874,7 @@ function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, g
                             end
                         end
                         
+                        -- Legacy property support
                         for key, val in pairs(config) do
                             if type(val) == "table" and key ~= "Properties" then
                                 local child = frame:FindFirstChild(key)
@@ -681,6 +886,7 @@ function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, g
                             end
                         end
                         
+                        -- Store frame data
                         if config.Url then
                             LoaderHandler.FramesUrl[frame] = config.Url
                         end
@@ -691,8 +897,21 @@ function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, g
                         
                         Melatonin.SetupFrameInteraction(frame)
                         
-                        frame.Position = UDim2.new(-0.1, 0, 0, 0)
-                        Tween(frame, {Position = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 0.25}, 0.35, Enum.EasingStyle.Back)
+                        -- Slide in animation
+                        Tween(frame, {Position = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 0.25}, 0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+                        
+                        -- Fade in children with stagger
+                        task.delay(0.1, function()
+                            if icon then SmoothTween(icon, {ImageTransparency = 0.4}, 0.25) end
+                            if gameName then SmoothTween(gameName, {TextTransparency = 0.4}, 0.25) end
+                        end)
+                        
+                        task.delay(0.15, function()
+                            if status then SmoothTween(status, {TextTransparency = 0.5}, 0.25) end
+                            if subTime then 
+                                SmoothTween(subTime, {TextTransparency = 0.5, BackgroundTransparency = 0.5}, 0.25) 
+                            end
+                        end)
                     end)
                 end
             end
