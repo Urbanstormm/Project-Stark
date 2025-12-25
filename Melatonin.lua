@@ -1,4 +1,4 @@
--- Obfuscation Shim (Simplified)
+-- Obfuscation Shim
 if not LPH_OBFUSCATED then
     local passthrough = function(...) return ... end
     LPH_JIT, LPH_JIT_MAX, LPH_NO_VIRTUALIZE, LPH_ENCSTR, LPH_ENCNUM = passthrough, passthrough, passthrough, passthrough, passthrough
@@ -18,30 +18,35 @@ local Services = {
     Tween = cloneref(game:GetService("TweenService")),
     Players = cloneref(game:GetService("Players"))
 }
-local LocalPlayer = Services.Players.LocalPlayer
 
--- Configuration
-local Config = {
-    Name = "Melatonin",
-    TweenTime = 0.25,
+-- Default Configuration
+getgenv().MelatoninUIConfig = getgenv().MelatoninUIConfig or {
+    LibraryName = "Melatonin",
     Theme = {
-        Primary = Color3.fromRGB(31, 33, 41),
-        Secondary = Color3.fromRGB(25, 25, 30),
-        Tertiary = Color3.fromRGB(23, 26, 31),
+        PrimaryBG = Color3.fromRGB(31, 33, 41),
+        SecondaryBG = Color3.fromRGB(25, 25, 30),
         Accent = Color3.fromRGB(158, 150, 222),
         Text = Color3.fromRGB(190, 190, 195),
         TextHover = Color3.fromRGB(205, 206, 212),
         Stroke = Color3.fromRGB(40, 40, 45),
         GameName = Color3.fromRGB(133, 127, 187)
     },
-    Logo = "rbxassetid://137737556913730"
+    Logos = {
+        MelaLogo = "rbxassetid://137737556913730",
+        LoadingLogo = "rbxassetid://137737556913730"
+    }
 }
+
+local Config = getgenv().MelatoninUIConfig
+Config.TweenTime = 0.25
 
 -- Utility Functions
 local function Create(class, props, children)
     local instance = Instance.new(class)
     for k, v in pairs(props or {}) do
-        if k ~= "Parent" then instance[k] = v end
+        if k ~= "Parent" then 
+            pcall(function() instance[k] = v end)
+        end
     end
     for _, child in ipairs(children or {}) do
         child.Parent = instance
@@ -51,11 +56,16 @@ local function Create(class, props, children)
 end
 
 local function Tween(instance, props, duration, style, direction)
+    if not instance or not instance.Parent then return end
     local info = TweenInfo.new(duration or Config.TweenTime, style or Enum.EasingStyle.Quint, direction or Enum.EasingDirection.Out)
     local tween = Services.Tween:Create(instance, info, props)
     tween:Play()
     return tween
 end
+
+-- Clean up old instances
+local existing = game.CoreGui:FindFirstChild("MelatoninFolder")
+if existing then existing:Destroy() end
 
 -- UI Container Setup
 local MelatoninFolder = Create("Folder", {Name = "MelatoninFolder", Parent = game.CoreGui})
@@ -67,12 +77,13 @@ local function CreateMainUI()
         Name = "Melatonin",
         ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
         Parent = ModuleContainer,
-        Enabled = false
+        Enabled = false,
+        ResetOnSpawn = false
     })
     
     local mainFrame = Create("Frame", {
         Name = "Main",
-        BackgroundColor3 = Config.Theme.Primary,
+        BackgroundColor3 = Config.Theme.PrimaryBG,
         BorderSizePixel = 0,
         Position = UDim2.fromScale(0.5, 0.5),
         AnchorPoint = Vector2.new(0.5, 0.5),
@@ -82,23 +93,23 @@ local function CreateMainUI()
     
     -- Top Bar
     local topBar = Create("Frame", {
-        Name = "TopBar",
-        BackgroundColor3 = Config.Theme.Tertiary,
+        Name = "TopLabels",
+        BackgroundColor3 = Config.Theme.SecondaryBG,
         BorderSizePixel = 0,
         Size = UDim2.new(1, 0, 0, 34),
         Parent = mainFrame
     }, {
         Create("Frame", {
-            Name = "AccentLine",
+            Name = "PurpleLine",
             BackgroundColor3 = Config.Theme.Accent,
             BorderSizePixel = 0,
             Position = UDim2.new(0, 0, 1, -2),
             Size = UDim2.new(1, 0, 0, 2)
         }),
         Create("TextLabel", {
-            Name = "Title",
-            Font = Enum.Font.Ubuntu,
-            Text = Config.Name,
+            Name = "MelatoninLabel",
+            FontFace = Font.new("rbxasset://fonts/families/Ubuntu.json"),
+            Text = Config.LibraryName,
             TextColor3 = Config.Theme.Text,
             TextSize = 15,
             BackgroundTransparency = 1,
@@ -107,10 +118,10 @@ local function CreateMainUI()
         }),
         Create("TextButton", {
             Name = "Close",
-            Font = Enum.Font.Ubuntu,
-            Text = "×",
+            FontFace = Font.new("rbxasset://fonts/families/Ubuntu.json"),
+            Text = "X",
             TextColor3 = Config.Theme.Text,
-            TextSize = 20,
+            TextSize = 14,
             TextTransparency = 0.4,
             AutoButtonColor = false,
             BackgroundTransparency = 1,
@@ -129,7 +140,7 @@ local function CreateMainUI()
         TopImage = "",
         BottomImage = "",
         MidImage = "rbxassetid://7445543667",
-        BackgroundColor3 = Config.Theme.Tertiary,
+        BackgroundColor3 = Config.Theme.SecondaryBG,
         BorderSizePixel = 0,
         Position = UDim2.fromOffset(7, 41),
         Size = UDim2.fromOffset(344, 213),
@@ -141,10 +152,10 @@ local function CreateMainUI()
         Create("UIStroke", {Color = Config.Theme.Stroke, Thickness = 1})
     })
     
-    -- Load Button
+    -- Load Button Frame
     local loadFrame = Create("Frame", {
         Name = "LoadFrame",
-        BackgroundColor3 = Config.Theme.Primary,
+        BackgroundColor3 = Config.Theme.PrimaryBG,
         BorderSizePixel = 0,
         Position = UDim2.fromOffset(7, 262),
         Size = UDim2.fromOffset(344, 28),
@@ -153,7 +164,7 @@ local function CreateMainUI()
         Create("UIStroke", {Color = Config.Theme.Stroke}),
         Create("TextButton", {
             Name = "Load",
-            Font = Enum.Font.Ubuntu,
+            FontFace = Font.new("rbxasset://fonts/families/Ubuntu.json"),
             Text = "Load",
             TextColor3 = Config.Theme.Text,
             TextSize = 14,
@@ -173,12 +184,13 @@ local function CreateLoadingUI()
         Name = "MelatoninLoading",
         ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
         Parent = ModuleContainer,
-        Enabled = false
+        Enabled = false,
+        ResetOnSpawn = false
     })
     
     local window = Create("Frame", {
         Name = "LoadingWindow",
-        BackgroundColor3 = Config.Theme.Primary,
+        BackgroundColor3 = Config.Theme.PrimaryBG,
         BorderSizePixel = 0,
         Position = UDim2.fromScale(0.5, 0.5),
         AnchorPoint = Vector2.new(0.5, 0.5),
@@ -188,15 +200,16 @@ local function CreateLoadingUI()
     
     -- Top Bar
     Create("Frame", {
-        Name = "TopBar",
-        BackgroundColor3 = Config.Theme.Secondary,
+        Name = "TopLabels",
+        BackgroundColor3 = Config.Theme.SecondaryBG,
         BorderSizePixel = 0,
         Size = UDim2.new(1, 0, 0, 27),
         Parent = window
     }, {
         Create("TextLabel", {
-            Font = Enum.Font.Ubuntu,
-            Text = Config.Name,
+            Name = "TextLabel",
+            FontFace = Font.new("rbxasset://fonts/families/Ubuntu.json"),
+            Text = Config.LibraryName,
             TextColor3 = Config.Theme.Text,
             TextSize = 14,
             BackgroundTransparency = 1,
@@ -204,21 +217,21 @@ local function CreateLoadingUI()
             Size = UDim2.new(0, 80, 1, 0)
         }),
         Create("Frame", {
-            Name = "AccentLine",
+            Name = "PurpleLine",
             BackgroundColor3 = Config.Theme.Accent,
             BorderSizePixel = 0,
             Position = UDim2.new(0, 0, 1, -2),
             Size = UDim2.new(1, 0, 0, 2)
         }),
         Create("Frame", {
-            Name = "LoadBarBG",
-            BackgroundColor3 = Config.Theme.Secondary,
+            Name = "BackgroundLoadBar",
+            BackgroundColor3 = Config.Theme.SecondaryBG,
             BorderSizePixel = 0,
             Position = UDim2.new(0.12, 0, 1, 8),
             Size = UDim2.new(0.76, 0, 0, 3)
         }, {
             Create("Frame", {
-                Name = "LoadBar",
+                Name = "LoadingLine",
                 BackgroundColor3 = Config.Theme.Accent,
                 BorderSizePixel = 0,
                 Size = UDim2.new(0, 0, 1, 0)
@@ -230,13 +243,13 @@ local function CreateLoadingUI()
     
     -- Logo
     Create("ImageLabel", {
-        Name = "Logo",
-        Image = Config.Logo,
+        Name = "MelaLogo",
+        Image = Config.Logos.MelaLogo,
         ScaleType = Enum.ScaleType.Fit,
         BackgroundTransparency = 1,
         Position = UDim2.fromScale(0.5, 0.6),
         AnchorPoint = Vector2.new(0.5, 0.5),
-        Size = UDim2.fromOffset(65, 55),
+        Size = UDim2.fromOffset(69, 56),
         Parent = window
     })
     
@@ -247,7 +260,7 @@ end
 local function CreateGameFrameTemplate()
     local frame = Create("Frame", {
         Name = "GameFrame",
-        BackgroundColor3 = Config.Theme.Tertiary,
+        BackgroundColor3 = Color3.fromRGB(19, 22, 27),
         BackgroundTransparency = 0.25,
         BorderSizePixel = 0,
         Size = UDim2.new(1, -4, 0, 49),
@@ -255,7 +268,7 @@ local function CreateGameFrameTemplate()
     })
     
     Create("ImageLabel", {
-        Name = "Icon",
+        Name = "ImageLabel",
         ImageTransparency = 0.4,
         ScaleType = Enum.ScaleType.Fit,
         BackgroundTransparency = 1,
@@ -266,7 +279,7 @@ local function CreateGameFrameTemplate()
     
     Create("TextLabel", {
         Name = "GameName",
-        Font = Enum.Font.UbuntuBold,
+        FontFace = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold),
         RichText = true,
         TextColor3 = Config.Theme.GameName,
         TextSize = 14,
@@ -279,8 +292,8 @@ local function CreateGameFrameTemplate()
     })
     
     Create("TextLabel", {
-        Name = "Status",
-        Font = Enum.Font.Ubuntu,
+        Name = "UpdateStatus",
+        FontFace = Font.new("rbxasset://fonts/families/Ubuntu.json"),
         RichText = true,
         TextColor3 = Config.Theme.Text,
         TextSize = 13,
@@ -294,11 +307,11 @@ local function CreateGameFrameTemplate()
     
     Create("TextLabel", {
         Name = "SubTime",
-        Font = Enum.Font.SourceSans,
-        TextColor3 = Config.Theme.TextHover,
+        FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json"),
+        TextColor3 = Config.Theme.TextHover or Config.Theme.Text,
         TextSize = 13,
         TextTransparency = 0.5,
-        BackgroundColor3 = Config.Theme.Primary,
+        BackgroundColor3 = Color3.fromRGB(42, 45, 56),
         BackgroundTransparency = 0.5,
         Position = UDim2.new(1, -68, 0.5, 0),
         AnchorPoint = Vector2.new(0, 0.5),
@@ -317,36 +330,39 @@ local GameFrameTemplate = CreateGameFrameTemplate()
 -- Melatonin Library
 local Melatonin = {}
 local LoaderHandler = {
-    MainUI = MainUI,
-    LoadingUI = LoadingUI,
+    Melatonin = MainUI,
+    MelatoninLoading = LoadingUI,
     GameFrame = GameFrameTemplate,
-    FrameData = {}
+    FrameData = {},
+    FramesUrl = {},
+    FrameCallbacks = {}
 }
 
-local ActiveFrame, ActiveTargets = nil, nil
+getgenv().ActiveFrame = nil
+local ActiveTargets = nil
 
 -- Hover Styles
 local Styles = {
     Enter = {
         Frame = {BackgroundTransparency = 0},
         GameName = {TextTransparency = 0, TextColor3 = Config.Theme.GameName},
-        Status = {TextTransparency = 0.2},
+        UpdateStatus = {TextTransparency = 0.2},
         SubTime = {TextTransparency = 0.2, BackgroundTransparency = 0.3},
-        Icon = {ImageTransparency = 0}
+        ImageLabel = {ImageTransparency = 0}
     },
     Leave = {
         Frame = {BackgroundTransparency = 0.25},
         GameName = {TextTransparency = 0.4, TextColor3 = Config.Theme.Text},
-        Status = {TextTransparency = 0.5},
+        UpdateStatus = {TextTransparency = 0.5},
         SubTime = {TextTransparency = 0.5, BackgroundTransparency = 0.5},
-        Icon = {ImageTransparency = 0.4}
+        ImageLabel = {ImageTransparency = 0.4}
     }
 }
 
 function Melatonin.ApplyStyle(targets, style, duration)
     for name, props in pairs(style) do
         local instance = targets[name]
-        if instance then
+        if instance and instance.Parent then
             Tween(instance, props, duration)
         end
     end
@@ -356,29 +372,30 @@ function Melatonin.SetupFrameInteraction(frame)
     local targets = {
         Frame = frame,
         GameName = frame:FindFirstChild("GameName"),
-        Status = frame:FindFirstChild("Status"),
+        UpdateStatus = frame:FindFirstChild("UpdateStatus"),
         SubTime = frame:FindFirstChild("SubTime"),
-        Icon = frame:FindFirstChild("Icon")
+        ImageLabel = frame:FindFirstChild("ImageLabel")
     }
     
     frame.MouseEnter:Connect(function()
-        if ActiveFrame ~= frame then
+        if getgenv().ActiveFrame ~= frame then
             Melatonin.ApplyStyle(targets, Styles.Enter, 0.15)
         end
     end)
     
     frame.MouseLeave:Connect(function()
-        if ActiveFrame ~= frame then
+        if getgenv().ActiveFrame ~= frame then
             Melatonin.ApplyStyle(targets, Styles.Leave, 0.2)
         end
     end)
     
     frame.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            if ActiveFrame and ActiveFrame ~= frame then
+            if getgenv().ActiveFrame and getgenv().ActiveFrame ~= frame and ActiveTargets then
                 Melatonin.ApplyStyle(ActiveTargets, Styles.Leave, 0.15)
             end
-            ActiveFrame, ActiveTargets = frame, targets
+            getgenv().ActiveFrame = frame
+            ActiveTargets = targets
             Melatonin.ApplyStyle(targets, Styles.Enter, 0.1)
             
             -- Click ripple effect
@@ -393,15 +410,19 @@ function Melatonin.SetupFrameInteraction(frame)
             
             Tween(ripple, {Size = UDim2.new(0, 5, 1, 0), BackgroundTransparency = 0.5}, 0.15)
             task.delay(0.15, function()
-                Tween(ripple, {BackgroundTransparency = 1}, 0.3).Completed:Once(function()
-                    ripple:Destroy()
-                end)
+                local t = Tween(ripple, {BackgroundTransparency = 1}, 0.3)
+                if t then
+                    t.Completed:Once(function()
+                        if ripple and ripple.Parent then ripple:Destroy() end
+                    end)
+                end
             end)
         end
     end)
 end
 
 function Melatonin.SetupButtonHover(button, hoverProps, normalProps)
+    if not button then return end
     button.MouseEnter:Connect(function()
         Tween(button, hoverProps, 0.12)
     end)
@@ -410,16 +431,16 @@ function Melatonin.SetupButtonHover(button, hoverProps, normalProps)
     end)
 end
 
-function Melatonin.CloseUI(screenGui)
-    if not screenGui then return end
+function Melatonin.CloseGuiEffect(screenGui)
+    if not screenGui or not screenGui.Parent then return end
     
     local descendants = screenGui:GetDescendants()
-    local tweens = {}
     
     -- Staggered fade out
     for i, obj in ipairs(descendants) do
-        local delay = i * 0.008
+        local delay = math.min(i * 0.006, 0.3)
         task.delay(delay, function()
+            if not obj or not obj.Parent then return end
             if obj:IsA("GuiObject") then
                 local props = {BackgroundTransparency = 1}
                 if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
@@ -428,15 +449,17 @@ function Melatonin.CloseUI(screenGui)
                 if obj:IsA("ImageLabel") or obj:IsA("ImageButton") then
                     props.ImageTransparency = 1
                 end
-                table.insert(tweens, Tween(obj, props, 0.3, Enum.EasingStyle.Quad))
+                Tween(obj, props, 0.3, Enum.EasingStyle.Quad)
             elseif obj:IsA("UIStroke") then
-                table.insert(tweens, Tween(obj, {Transparency = 1}, 0.3))
+                Tween(obj, {Transparency = 1}, 0.3)
             end
         end)
     end
     
-    task.delay(#descendants * 0.008 + 0.35, function()
-        screenGui:Destroy()
+    task.delay(0.5, function()
+        if screenGui and screenGui.Parent then
+            screenGui:Destroy()
+        end
     end)
 end
 
@@ -444,7 +467,6 @@ function Melatonin.MakeDraggable(frame)
     if not frame then return end
     
     local dragging, dragStart, startPos = false, nil, nil
-    local dragConnection
     
     frame.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -460,73 +482,121 @@ function Melatonin.MakeDraggable(frame)
         end
     end)
     
-    dragConnection = Services.RunService.RenderStepped:Connect(function(dt)
+    Services.RunService.RenderStepped:Connect(function(dt)
         if dragging and startPos then
             local mouse = Services.UserInput:GetMouseLocation()
             local delta = mouse - dragStart
-            local viewport = workspace.CurrentCamera.ViewportSize
+            local viewport = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920, 1080)
             local size = frame.AbsoluteSize
+            local anchor = frame.AnchorPoint
             
-            local newX = math.clamp(startPos.X.Offset + delta.X, 0, viewport.X - size.X)
-            local newY = math.clamp(startPos.Y.Offset + delta.Y, 0, viewport.Y - size.Y)
+            local newX = startPos.X.Offset + delta.X
+            local newY = startPos.Y.Offset + delta.Y
+            
+            -- Clamp to screen
+            newX = math.clamp(newX, -size.X * anchor.X, viewport.X - size.X * (1 - anchor.X))
+            newY = math.clamp(newY, -size.Y * anchor.Y, viewport.Y - size.Y * (1 - anchor.Y))
             
             -- Smooth interpolation
             local currentPos = frame.Position
             local targetPos = UDim2.fromOffset(newX, newY)
-            frame.Position = currentPos:Lerp(targetPos, math.min(1, dt * 25))
+            frame.Position = currentPos:Lerp(targetPos, math.min(1, dt * 20))
         end
     end)
 end
 
-function Melatonin.Load(duration, frameConfigs, callback)
-    local playerGui = LocalPlayer:WaitForChild("PlayerGui")
+function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, gameFrameTemplate, callback)
+    if not player or not player:IsA("Player") then 
+        warn("[Melatonin] Invalid player provided")
+        return 
+    end
+    
+    mainTemplate = mainTemplate or MainUI
+    gameFrameTemplate = gameFrameTemplate or GameFrameTemplate
+    
+    local playerGui = player:WaitForChild("PlayerGui")
+    
+    -- Clean up existing UIs
+    for _, gui in ipairs(playerGui:GetChildren()) do
+        if gui.Name == "Melatonin" or gui.Name == "MelatoninLoading" then
+            gui:Destroy()
+        end
+    end
     
     -- Clone and show loading UI
     local loadingClone = LoadingUI:Clone()
     loadingClone.Parent = playerGui
     loadingClone.Enabled = true
     
-    local window = loadingClone.LoadingWindow
-    local loadBar = window.TopBar.LoadBarBG.LoadBar
-    local logo = window.Logo
+    local window = loadingClone:FindFirstChild("LoadingWindow")
+    if not window then 
+        warn("[Melatonin] LoadingWindow not found")
+        return 
+    end
+    
+    local topLabels = window:FindFirstChild("TopLabels")
+    local loadBarBG = topLabels and topLabels:FindFirstChild("BackgroundLoadBar")
+    local loadBar = loadBarBG and loadBarBG:FindFirstChild("LoadingLine")
+    local logo = window:FindFirstChild("MelaLogo")
     
     Melatonin.MakeDraggable(window)
     
     -- Initial animation
     window.BackgroundTransparency = 1
-    logo.ImageTransparency = 1
+    if logo then logo.ImageTransparency = 1 end
     
     Tween(window, {BackgroundTransparency = 0}, 0.4, Enum.EasingStyle.Quint)
-    Tween(logo, {ImageTransparency = 0}, 0.5, Enum.EasingStyle.Quint)
+    if logo then Tween(logo, {ImageTransparency = 0}, 0.5, Enum.EasingStyle.Quint) end
     
     -- Pulsing logo animation
     local pulseConnection
-    pulseConnection = Services.RunService.RenderStepped:Connect(function(dt)
-        if logo and logo.Parent then
-            local pulse = 1 + math.sin(tick() * 3) * 0.03
-            logo.Size = UDim2.fromOffset(65 * pulse, 55 * pulse)
-        end
-    end)
+    if logo then
+        local originalSize = logo.Size
+        pulseConnection = Services.RunService.RenderStepped:Connect(function()
+            if logo and logo.Parent then
+                local pulse = 1 + math.sin(tick() * 3) * 0.03
+                logo.Size = UDim2.fromOffset(originalSize.X.Offset * pulse, originalSize.Y.Offset * pulse)
+            end
+        end)
+    end
     
-    -- Loading bar animation with easing
-    task.delay(0.2, function()
-        Tween(loadBar, {Size = UDim2.new(1, 0, 1, 0)}, duration - 0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
-    end)
+    -- Loading bar animation
+    if loadBar then
+        task.delay(0.2, function()
+            Tween(loadBar, {Size = UDim2.new(1, 0, 1, 0)}, duration - 0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
+        end)
+    end
     
     task.delay(duration, function()
-        pulseConnection:Disconnect()
-        Melatonin.CloseUI(loadingClone)
+        if pulseConnection then pulseConnection:Disconnect() end
+        Melatonin.CloseGuiEffect(loadingClone)
         
-        task.delay(0.4, function()
+        task.delay(0.5, function()
+            -- Reset active frame
+            getgenv().ActiveFrame = nil
+            ActiveTargets = nil
+            LoaderHandler.FrameData = {}
+            LoaderHandler.FramesUrl = {}
+            LoaderHandler.FrameCallbacks = {}
+            
             -- Clone and show main UI
-            local mainClone = MainUI:Clone()
+            local mainClone = mainTemplate:Clone()
             mainClone.Parent = playerGui
             mainClone.Enabled = true
+            getgenv().newUI = mainClone
             
-            local mainFrame = mainClone.Main
-            local gamesHolder = mainFrame.GamesHolder
-            local loadBtn = mainFrame.LoadFrame.Load
-            local closeBtn = mainFrame.TopBar.Close
+            local mainFrame = mainClone:FindFirstChild("Main")
+            if not mainFrame then 
+                warn("[Melatonin] Main frame not found")
+                return 
+            end
+            
+            local gamesHolder = mainFrame:FindFirstChild("GamesHolder")
+            local loadFrame = mainFrame:FindFirstChild("LoadFrame")
+            local topLabelsMain = mainFrame:FindFirstChild("TopLabels")
+            
+            local loadBtn = loadFrame and loadFrame:FindFirstChild("Load")
+            local closeBtn = topLabelsMain and topLabelsMain:FindFirstChild("Close")
             
             Melatonin.MakeDraggable(mainFrame)
             
@@ -536,66 +606,103 @@ function Melatonin.Load(duration, frameConfigs, callback)
             Tween(mainFrame, {Position = UDim2.fromScale(0.5, 0.5), BackgroundTransparency = 0}, 0.5, Enum.EasingStyle.Back)
             
             -- Button hover effects
-            Melatonin.SetupButtonHover(loadBtn, 
-                {TextTransparency = 0, TextColor3 = Config.Theme.Accent},
-                {TextTransparency = 0.4, TextColor3 = Config.Theme.Text}
-            )
-            
-            Melatonin.SetupButtonHover(closeBtn,
-                {TextTransparency = 0, TextColor3 = Color3.fromRGB(255, 100, 100)},
-                {TextTransparency = 0.4, TextColor3 = Config.Theme.Text}
-            )
-            
-            -- Close button
-            closeBtn.MouseButton1Click:Connect(function()
-                Melatonin.CloseUI(mainClone)
-            end)
-            
-            -- Load button
-            loadBtn.MouseButton1Click:Connect(function()
-                if not ActiveFrame then return end
-                local data = LoaderHandler.FrameData[ActiveFrame]
-                if not data then return end
+            if loadBtn then
+                Melatonin.SetupButtonHover(loadBtn, 
+                    {TextTransparency = 0, TextColor3 = Config.Theme.Accent},
+                    {TextTransparency = 0.4, TextColor3 = Config.Theme.Text}
+                )
                 
-                if data.Callback then
-                    data.Callback(ActiveFrame, mainClone)
-                elseif data.Url then
-                    Melatonin.CloseUI(mainClone)
-                    task.delay(0.5, function()
-                        loadstring(game:HttpGet(data.Url))()
-                    end)
-                end
-            end)
+                loadBtn.MouseButton1Click:Connect(function()
+                    local active = getgenv().ActiveFrame
+                    if not active then return end
+                    
+                    local frameCallback = LoaderHandler.FrameCallbacks[active]
+                    if typeof(frameCallback) == "function" then
+                        frameCallback(active, mainClone)
+                        return
+                    end
+                    
+                    local url = LoaderHandler.FramesUrl[active]
+                    if url and url ~= "" then
+                        Melatonin.CloseGuiEffect(mainClone)
+                        task.delay(0.5, function()
+                            loadstring(game:HttpGet(url))()
+                        end)
+                    end
+                end)
+            end
+            
+            if closeBtn then
+                Melatonin.SetupButtonHover(closeBtn,
+                    {TextTransparency = 0, TextColor3 = Color3.fromRGB(255, 100, 100)},
+                    {TextTransparency = 0.4, TextColor3 = Config.Theme.Text}
+                )
+                
+                closeBtn.MouseButton1Click:Connect(function()
+                    Melatonin.CloseGuiEffect(mainClone)
+                end)
+            end
             
             -- Create game frames with staggered animation
-            for i, config in ipairs(frameConfigs or {}) do
-                task.delay(i * 0.08, function()
-                    local frame = GameFrameTemplate:Clone()
-                    frame.Name = "Game_" .. i
-                    frame.Parent = gamesHolder
-                    frame.BackgroundTransparency = 1
-                    
-                    local icon = frame:FindFirstChild("Icon")
-                    local gameName = frame:FindFirstChild("GameName")
-                    local status = frame:FindFirstChild("Status")
-                    local subTime = frame:FindFirstChild("SubTime")
-                    
-                    if icon then icon.Image = config.Image or "" end
-                    if gameName then gameName.Text = config.GameName or "Game" end
-                    if status then status.Text = config.Status or "Unknown" end
-                    if subTime then subTime.Text = config.SubTime or "N/A" end
-                    
-                    LoaderHandler.FrameData[frame] = {
-                        Url = config.Url,
-                        Callback = config.Callback
-                    }
-                    
-                    Melatonin.SetupFrameInteraction(frame)
-                    
-                    -- Slide in animation
-                    frame.Position = UDim2.new(-0.1, 0, 0, 0)
-                    Tween(frame, {Position = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 0.25}, 0.35, Enum.EasingStyle.Back)
-                end)
+            if gamesHolder then
+                for i, config in ipairs(frameConfigs or {}) do
+                    task.delay(i * 0.08, function()
+                        local frame = gameFrameTemplate:Clone()
+                        frame.Name = "GameFrame_" .. i
+                        frame.Parent = gamesHolder
+                        frame.BackgroundTransparency = 1
+                        
+                        local icon = frame:FindFirstChild("ImageLabel")
+                        local gameName = frame:FindFirstChild("GameName")
+                        local status = frame:FindFirstChild("UpdateStatus")
+                        local subTime = frame:FindFirstChild("SubTime")
+                        
+                        -- Set frame content
+                        if icon then icon.Image = config.Image or "" end
+                        if gameName then gameName.Text = config.GameName or "Game" end
+                        if status then status.Text = config.Status or "Unknown" end
+                        if subTime then subTime.Text = config.SubTime or "N/A" end
+                        
+                        -- Apply custom properties
+                        if config.Properties then
+                            for childName, props in pairs(config.Properties) do
+                                local child = frame:FindFirstChild(childName)
+                                if child then
+                                    for prop, val in pairs(props) do
+                                        pcall(function() child[prop] = val end)
+                                    end
+                                end
+                            end
+                        end
+                        
+                        -- Legacy: Direct property tables (like ImageLabel = {...})
+                        for key, val in pairs(config) do
+                            if type(val) == "table" and key ~= "Properties" then
+                                local child = frame:FindFirstChild(key)
+                                if child then
+                                    for prop, propVal in pairs(val) do
+                                        pcall(function() child[prop] = propVal end)
+                                    end
+                                end
+                            end
+                        end
+                        
+                        -- Store frame data
+                        if config.Url then
+                            LoaderHandler.FramesUrl[frame] = config.Url
+                        end
+                        if typeof(config.Callback) == "function" then
+                            LoaderHandler.FrameCallbacks[frame] = config.Callback
+                        end
+                        LoaderHandler.FrameData[frame] = config
+                        
+                        Melatonin.SetupFrameInteraction(frame)
+                        
+                        -- Slide in animation
+                        frame.Position = UDim2.new(-0.1, 0, 0, 0)
+                        Tween(frame, {Position = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 0.25}, 0.35, Enum.EasingStyle.Back)
+                    end)
+                end
             end
             
             if callback then callback(mainClone) end
@@ -603,5 +710,8 @@ function Melatonin.Load(duration, frameConfigs, callback)
     end)
 end
 
-getgenv().MelatoninUI = Melatonin
+-- Aliases for backwards compatibility
+Melatonin.CloseUIEffect = Melatonin.CloseGuiEffect
+Melatonin.Load = Melatonin.LoadingEffect
+
 return Melatonin, MainUI, GameFrameTemplate
