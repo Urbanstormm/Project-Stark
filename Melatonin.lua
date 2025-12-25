@@ -19,6 +19,13 @@ local Services = {
     Players = cloneref(game:GetService("Players"))
 }
 
+-- Font Definitions (to avoid Enum.Font issues)
+local Fonts = {
+    Ubuntu = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal),
+    UbuntuBold = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+    SourceSans = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+}
+
 -- Default Configuration
 getgenv().MelatoninUIConfig = getgenv().MelatoninUIConfig or {
     LibraryName = "Melatonin",
@@ -108,7 +115,7 @@ local function CreateMainUI()
         }),
         Create("TextLabel", {
             Name = "MelatoninLabel",
-            FontFace = Font.new("rbxasset://fonts/families/Ubuntu.json"),
+            FontFace = Fonts.Ubuntu,
             Text = Config.LibraryName,
             TextColor3 = Config.Theme.Text,
             TextSize = 15,
@@ -118,7 +125,7 @@ local function CreateMainUI()
         }),
         Create("TextButton", {
             Name = "Close",
-            FontFace = Font.new("rbxasset://fonts/families/Ubuntu.json"),
+            FontFace = Fonts.Ubuntu,
             Text = "X",
             TextColor3 = Config.Theme.Text,
             TextSize = 14,
@@ -164,7 +171,7 @@ local function CreateMainUI()
         Create("UIStroke", {Color = Config.Theme.Stroke}),
         Create("TextButton", {
             Name = "Load",
-            FontFace = Font.new("rbxasset://fonts/families/Ubuntu.json"),
+            FontFace = Fonts.Ubuntu,
             Text = "Load",
             TextColor3 = Config.Theme.Text,
             TextSize = 14,
@@ -208,7 +215,7 @@ local function CreateLoadingUI()
     }, {
         Create("TextLabel", {
             Name = "TextLabel",
-            FontFace = Font.new("rbxasset://fonts/families/Ubuntu.json"),
+            FontFace = Fonts.Ubuntu,
             Text = Config.LibraryName,
             TextColor3 = Config.Theme.Text,
             TextSize = 14,
@@ -279,8 +286,9 @@ local function CreateGameFrameTemplate()
     
     Create("TextLabel", {
         Name = "GameName",
-        FontFace = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold),
+        FontFace = Fonts.UbuntuBold,
         RichText = true,
+        Text = "",
         TextColor3 = Config.Theme.GameName,
         TextSize = 14,
         TextTransparency = 0.4,
@@ -293,8 +301,9 @@ local function CreateGameFrameTemplate()
     
     Create("TextLabel", {
         Name = "UpdateStatus",
-        FontFace = Font.new("rbxasset://fonts/families/Ubuntu.json"),
+        FontFace = Fonts.Ubuntu,
         RichText = true,
+        Text = "",
         TextColor3 = Config.Theme.Text,
         TextSize = 13,
         TextTransparency = 0.5,
@@ -307,7 +316,8 @@ local function CreateGameFrameTemplate()
     
     Create("TextLabel", {
         Name = "SubTime",
-        FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json"),
+        FontFace = Fonts.SourceSans,
+        Text = "",
         TextColor3 = Config.Theme.TextHover or Config.Theme.Text,
         TextSize = 13,
         TextTransparency = 0.5,
@@ -436,7 +446,6 @@ function Melatonin.CloseGuiEffect(screenGui)
     
     local descendants = screenGui:GetDescendants()
     
-    -- Staggered fade out
     for i, obj in ipairs(descendants) do
         local delay = math.min(i * 0.006, 0.3)
         task.delay(delay, function()
@@ -493,11 +502,9 @@ function Melatonin.MakeDraggable(frame)
             local newX = startPos.X.Offset + delta.X
             local newY = startPos.Y.Offset + delta.Y
             
-            -- Clamp to screen
             newX = math.clamp(newX, -size.X * anchor.X, viewport.X - size.X * (1 - anchor.X))
             newY = math.clamp(newY, -size.Y * anchor.Y, viewport.Y - size.Y * (1 - anchor.Y))
             
-            -- Smooth interpolation
             local currentPos = frame.Position
             local targetPos = UDim2.fromOffset(newX, newY)
             frame.Position = currentPos:Lerp(targetPos, math.min(1, dt * 20))
@@ -516,14 +523,12 @@ function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, g
     
     local playerGui = player:WaitForChild("PlayerGui")
     
-    -- Clean up existing UIs
     for _, gui in ipairs(playerGui:GetChildren()) do
         if gui.Name == "Melatonin" or gui.Name == "MelatoninLoading" then
             gui:Destroy()
         end
     end
     
-    -- Clone and show loading UI
     local loadingClone = LoadingUI:Clone()
     loadingClone.Parent = playerGui
     loadingClone.Enabled = true
@@ -541,14 +546,12 @@ function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, g
     
     Melatonin.MakeDraggable(window)
     
-    -- Initial animation
     window.BackgroundTransparency = 1
     if logo then logo.ImageTransparency = 1 end
     
     Tween(window, {BackgroundTransparency = 0}, 0.4, Enum.EasingStyle.Quint)
     if logo then Tween(logo, {ImageTransparency = 0}, 0.5, Enum.EasingStyle.Quint) end
     
-    -- Pulsing logo animation
     local pulseConnection
     if logo then
         local originalSize = logo.Size
@@ -560,7 +563,6 @@ function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, g
         end)
     end
     
-    -- Loading bar animation
     if loadBar then
         task.delay(0.2, function()
             Tween(loadBar, {Size = UDim2.new(1, 0, 1, 0)}, duration - 0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
@@ -572,14 +574,12 @@ function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, g
         Melatonin.CloseGuiEffect(loadingClone)
         
         task.delay(0.5, function()
-            -- Reset active frame
             getgenv().ActiveFrame = nil
             ActiveTargets = nil
             LoaderHandler.FrameData = {}
             LoaderHandler.FramesUrl = {}
             LoaderHandler.FrameCallbacks = {}
             
-            -- Clone and show main UI
             local mainClone = mainTemplate:Clone()
             mainClone.Parent = playerGui
             mainClone.Enabled = true
@@ -600,12 +600,10 @@ function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, g
             
             Melatonin.MakeDraggable(mainFrame)
             
-            -- Entrance animation
             mainFrame.Position = UDim2.fromScale(0.5, 0.55)
             mainFrame.BackgroundTransparency = 1
             Tween(mainFrame, {Position = UDim2.fromScale(0.5, 0.5), BackgroundTransparency = 0}, 0.5, Enum.EasingStyle.Back)
             
-            -- Button hover effects
             if loadBtn then
                 Melatonin.SetupButtonHover(loadBtn, 
                     {TextTransparency = 0, TextColor3 = Config.Theme.Accent},
@@ -643,7 +641,6 @@ function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, g
                 end)
             end
             
-            -- Create game frames with staggered animation
             if gamesHolder then
                 for i, config in ipairs(frameConfigs or {}) do
                     task.delay(i * 0.08, function()
@@ -657,13 +654,11 @@ function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, g
                         local status = frame:FindFirstChild("UpdateStatus")
                         local subTime = frame:FindFirstChild("SubTime")
                         
-                        -- Set frame content
                         if icon then icon.Image = config.Image or "" end
                         if gameName then gameName.Text = config.GameName or "Game" end
                         if status then status.Text = config.Status or "Unknown" end
                         if subTime then subTime.Text = config.SubTime or "N/A" end
                         
-                        -- Apply custom properties
                         if config.Properties then
                             for childName, props in pairs(config.Properties) do
                                 local child = frame:FindFirstChild(childName)
@@ -675,7 +670,6 @@ function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, g
                             end
                         end
                         
-                        -- Legacy: Direct property tables (like ImageLabel = {...})
                         for key, val in pairs(config) do
                             if type(val) == "table" and key ~= "Properties" then
                                 local child = frame:FindFirstChild(key)
@@ -687,7 +681,6 @@ function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, g
                             end
                         end
                         
-                        -- Store frame data
                         if config.Url then
                             LoaderHandler.FramesUrl[frame] = config.Url
                         end
@@ -698,7 +691,6 @@ function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, g
                         
                         Melatonin.SetupFrameInteraction(frame)
                         
-                        -- Slide in animation
                         frame.Position = UDim2.new(-0.1, 0, 0, 0)
                         Tween(frame, {Position = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 0.25}, 0.35, Enum.EasingStyle.Back)
                     end)
@@ -710,7 +702,6 @@ function Melatonin.LoadingEffect(duration, player, frameConfigs, mainTemplate, g
     end)
 end
 
--- Aliases for backwards compatibility
 Melatonin.CloseUIEffect = Melatonin.CloseGuiEffect
 Melatonin.Load = Melatonin.LoadingEffect
 
