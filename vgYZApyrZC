@@ -1,4 +1,4 @@
-local _K={"UC9TXzVoZ2Z1WWtMSG0"}
+local _K={"UC9TXzgydks5TmNWbXE"}
 local _B='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 local function _D(d)
  d=string.gsub(d,'[^'.._B..'=]','')
