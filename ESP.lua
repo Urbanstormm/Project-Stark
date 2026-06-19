@@ -43,18 +43,14 @@ local Vector2new, Vector3zero, CFramenew = Vector2.new, Vector3.zero, CFrame.new
 local Drawingnew, DrawingFonts = Drawing.new, Drawing.Fonts
 local Color3fromRGB, Color3fromHSV = Color3.fromRGB, Color3.fromHSV
 
-local GameMetatable = getrawmetatable and getrawmetatable(game) or {
-	-- Auxillary functions - if the executor doesn't support "getrawmetatable".
-
-	__index = function(self, Index)
-		return self[Index]
-	end,
-
-	__newindex = function(self, Index, Value)
-		self[Index] = Value
-	end
-}
-
+local GameMetatable = getrawmetatable and getrawmetatable(game)
+if not GameMetatable then
+	local __refindex;
+	xpcall(function() return game.meow_this_should_error end, function() __refindex = debug.info(2, "f") end)
+	local __refnewindex;
+	xpcall(function() game.meow_this_should_error = true end, function() __refnewindex = debug.info(2, "f") end)
+	GameMetatable = {__index = __refindex, __newindex = __refnewindex}
+end
 local __index = GameMetatable.__index
 local __newindex = GameMetatable.__newindex
 
