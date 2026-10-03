@@ -32,6 +32,18 @@ local win = nil
 local userInput = ""
 local activeKey = nil
 
+local toastGui = nil
+
+local function randomGuiName()
+	local charset = "abcdefghijklmnopqrstuvwxyz0123456789"
+	local name = ""
+	for _ = 1, 14 do
+		local index = math.random(1, #charset)
+		name = name .. charset:sub(index, index)
+	end
+	return name
+end
+
 local function notify(text, kind)
 	-- Once the UI library is loaded, use its themed notification system.
 	local lib = rawget(_G, "ProjectStarkUILib")
@@ -54,15 +66,20 @@ local function notify(text, kind)
 	end
 	-- Pre-UI fallback (key server / UI load errors before the lib exists).
 	pcall(function()
-		local coreGui = game:GetService("CoreGui")
-		local gui = coreGui:FindFirstChild("ProjectStarkToast")
-		if not gui then
-			gui = Instance.new("ScreenGui")
-			gui.Name = "ProjectStarkToast"
-			gui.ResetOnSpawn = false
-			gui.IgnoreGuiInset = true
-			gui.DisplayOrder = 999999
-			gui.Parent = coreGui
+		if not (toastGui and toastGui.Parent) then
+			local parent = game:GetService("CoreGui")
+			if type(gethui) == "function" then
+				local ok, hidden = pcall(gethui)
+				if ok and hidden then
+					parent = hidden
+				end
+			end
+			toastGui = Instance.new("ScreenGui")
+			toastGui.Name = randomGuiName()
+			toastGui.ResetOnSpawn = false
+			toastGui.IgnoreGuiInset = true
+			toastGui.DisplayOrder = 999999
+			toastGui.Parent = parent
 		end
 		local label = Instance.new("TextLabel")
 		label.Size = UDim2.new(0, 440, 0, 48)
@@ -81,7 +98,7 @@ local function notify(text, kind)
 		label.Font = Enum.Font.GothamMedium
 		label.TextSize = 15
 		label.Text = tostring(text)
-		label.Parent = gui
+		label.Parent = toastGui
 		task.delay(7, function()
 			pcall(function()
 				label:Destroy()
