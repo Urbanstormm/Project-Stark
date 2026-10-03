@@ -18,8 +18,7 @@ local activeBase = nil
 local OFFLINE_GRACE_SECONDS = 3600
 
 local skipKeyCheck = false
-local discordCode = "FDG5V5AfFh"
-local discordLink = "https://discord.gg/FDG5V5AfFh"
+local discordUrl = "https://urbanstorm.uk/discord"
 local keyLink = "https://Urbanstorm.uk"
 local keyFileName = "ProjectStark_Key.txt"
 local wrongAttempts = 0
@@ -111,9 +110,31 @@ end
 
 local function copyDiscordLink()
 	pcall(function()
-		setclipboard(discordLink)
+		setclipboard(discordUrl)
 	end)
 end
+
+local function joinDiscord()
+	copyDiscordLink()
+	-- Resolve a fresh invite code so the Discord RPC path can join directly.
+	local ok, body = pcall(function()
+		return game:HttpGet(discordUrl .. "?format=json", true)
+	end)
+	if ok and type(body) == "string" and body:sub(1, 1) == "{" then
+		local okDecode, data = pcall(function()
+			return HttpService:JSONDecode(body)
+		end)
+		if okDecode and type(data) == "table" and type(data.code) == "string" and #data.code > 0 then
+			Invdiscord(data.code)
+			return
+		end
+	end
+	pcall(function()
+		game:GetService("GuiService"):OpenBrowserWindow(discordUrl)
+	end)
+end
+
+_G.ProjectStarkJoinDiscord = joinDiscord
 
 local function Invdiscord(code)
 	pcall(function()
@@ -583,8 +604,7 @@ HelpTab:Button("My key expired", function()
 end)
 
 HelpTab:Button("Join Discord for help", function()
-	Invdiscord(discordCode)
-	copyDiscordLink()
+	joinDiscord()
 end)
 
 local Credits = win:Tab("Credits")
@@ -595,7 +615,6 @@ Credits:Button("Made by Urbanstorm", function()
 	end)
 end)
 
-Credits:Button(discordLink .. " - Click to copy", function()
-	Invdiscord(discordCode)
-	copyDiscordLink()
+Credits:Button(discordUrl .. " - Click to copy", function()
+	joinDiscord()
 end)
