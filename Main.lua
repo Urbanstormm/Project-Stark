@@ -7,22 +7,27 @@ local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 
 local KEY_VERIFIED_FLAG = "ProjectStarkKeyVerified"
--- hyxx.win/api/* is reverse-proxied to the origin by the site Worker, which
--- keeps the API reachable on networks whose ISP blocks the api.* subdomain.
+-- urbanstorm.uk/api/* is reverse-proxied to the origin by the site Worker,
+-- which keeps the API reachable on networks that block the api.* subdomain.
 -- api.hyxx.win is kept as a fallback.
 local HUB_API_BASES = {
-	"https://hyxx.win",
+	"https://urbanstorm.uk",
 	"https://api.hyxx.win",
 }
 local activeBase = nil
-local OFFLINE_GRACE_SECONDS = 3600
+
+-- Defaults only: the server's /api/hub/config overrides these at startup so
+-- links and policies are not baked into the public loader.
+local hubConfig = {
+	site = "https://urbanstorm.uk",
+	discord = "https://urbanstorm.uk/discord",
+	grace_seconds = 3600,
+	max_attempts = 3,
+}
 
 local skipKeyCheck = false
-local discordUrl = "https://urbanstorm.uk/discord"
-local keyLink = "https://Urbanstorm.uk"
 local keyFileName = "ProjectStark_Key.txt"
 local wrongAttempts = 0
-local maxAttempts = 3
 local win = nil
 local userInput = ""
 local activeKey = nil
@@ -104,13 +109,13 @@ end
 
 local function copyKeyLink()
 	pcall(function()
-		setclipboard(keyLink)
+		setclipboard(hubConfig.site)
 	end)
 end
 
 local function copyDiscordLink()
 	pcall(function()
-		setclipboard(discordUrl)
+		setclipboard(hubConfig.discord)
 	end)
 end
 
@@ -118,7 +123,7 @@ local function joinDiscord()
 	copyDiscordLink()
 	-- Resolve a fresh invite code so the Discord RPC path can join directly.
 	local ok, body = pcall(function()
-		return game:HttpGet(discordUrl .. "?format=json", true)
+		return game:HttpGet(hubConfig.discord .. "?format=json", true)
 	end)
 	if ok and type(body) == "string" and body:sub(1, 1) == "{" then
 		local okDecode, data = pcall(function()
@@ -130,7 +135,7 @@ local function joinDiscord()
 		end
 	end
 	pcall(function()
-		game:GetService("GuiService"):OpenBrowserWindow(discordUrl)
+		game:GetService("GuiService"):OpenBrowserWindow(hubConfig.discord)
 	end)
 end
 
@@ -244,17 +249,25 @@ local function hubHttpGet(path)
 	return nil, "network"
 end
 
-local function hubErrorText(code)
-	local messages = {
-		HUB_INVALID = "Invalid key. Get one at urbanstorm.uk",
-		HUB_REVOKED = "This key has been revoked.",
-		HUB_EXPIRED = "Your key expired. Get a new one at urbanstorm.uk",
-		HUB_USERID_MISMATCH = "This key belongs to a different Roblox account.",
-		HUB_HWID_MISMATCH = "This key is locked to a different PC. Use /hubreset in the Project Stark Discord.",
-		HUB_RATE_LIMITED = "Too many attempts - wait a minute and try again.",
-		HUB_BAD_REQUEST = "Key check failed. Re-copy your key and try again.",
-	}
-	return messages[code] or "Key check failed. Get a new key at urbanstorm.uk"
+local function fetchHubConfig()
+	local data = hubHttpGet("/api/hub/config")
+	if type(data) ~= "table" or data.success ~= true then
+		return
+	end
+	if type(data.site) == "string" and #data.site > 0 then
+		hubConfig.site = data.site
+	end
+	if type(data.discord) == "string" and #data.discord > 0 then
+		hubConfig.discord = data.discord
+	end
+	local grace = tonumber(data.grace_seconds)
+	if grace and grace > 0 then
+		hubConfig.grace_seconds = grace
+	end
+	local attempts = tonumber(data.max_attempts)
+	if attempts and attempts > 0 then
+		hubConfig.max_attempts = attempts
+	end
 end
 
 local function verifyKey(key)
@@ -265,14 +278,15 @@ local function verifyKey(key)
 		"/api/hub/verify?key=%s&user_id=%s&hwid=%s",
 		HttpService:UrlEncode(key), tostring(userId), HttpService:UrlEncode(hwid)
 	)
-	local data, netErr = hubHttpGet(path)
+	local data = hubHttpGet(path)
 	if not data then
-		return nil, "network"
+		return nil, "network", nil
 	end
 	if data.valid == true then
-		return data, nil
+		return data, nil, nil
 	end
-	return nil, data.code or "HUB_INVALID"
+	-- The server owns the user-facing wording for every rejection.
+	return nil, data.code or "HUB_INVALID", data.error
 end
 
 local function setActiveSession(key, data)
@@ -418,8 +432,8 @@ local function handleWrongKey()
 	wrongAttempts = wrongAttempts + 1
 	copyKeyLink()
 
-	if wrongAttempts >= maxAttempts then
-		notify("Too many invalid attempts. Get a key at urbanstorm.uk", "error")
+	if wrongAttempts >= hubConfig.max_attempts then
+		notify("Too many invalid attempts. Get a key at " .. hubConfig.site, "error")
 		task.delay(1, function()
 			kickPlayer("Project Stark: too many invalid key attempts.")
 		end)
@@ -430,15 +444,15 @@ local function handleKeyValidation(rawInput)
 	local cleanKey, issues = sanitizeKey(rawInput)
 
 	if issues.empty or issues.tooShort or issues.tooLong then
-		notify("Enter your key from urbanstorm.uk", "error")
+		notify("Enter your key from " .. hubConfig.site, "error")
 		return false
 	end
 
-	if wrongAttempts >= maxAttempts then
+	if wrongAttempts >= hubConfig.max_attempts then
 		return false
 	end
 
-	local data, code = verifyKey(cleanKey)
+	local data, code, errText = verifyKey(cleanKey)
 	if data then
 		setActiveSession(cleanKey, data)
 		setKeyVerified()
@@ -452,12 +466,15 @@ local function handleKeyValidation(rawInput)
 		return false
 	end
 
-	notify(hubErrorText(code), "error")
+	notify(errText or ("Key check failed. Get a new key at " .. hubConfig.site), "error")
 	handleWrongKey()
 	return false
 end
 
 clearLegacyKeyCheck()
+
+-- Server-side client config (links, grace window, attempt limit).
+fetchHubConfig()
 
 local hubContinue = rawget(_G, "ProjectStarkHubContinue")
 
@@ -483,7 +500,7 @@ local savedRejected = false
 if saved and type(saved.key) == "string" and saved.key ~= "" then
 	local cleanSavedKey = sanitizeKey(saved.key)
 	if cleanSavedKey ~= "" then
-		local data, code = verifyKey(cleanSavedKey)
+		local data, code, errText = verifyKey(cleanSavedKey)
 		if data then
 			setActiveSession(cleanSavedKey, data)
 			setKeyVerified()
@@ -493,10 +510,11 @@ if saved and type(saved.key) == "string" and saved.key ~= "" then
 			local lastOk = tonumber(saved.last_ok) or 0
 			local secondsLeft = tonumber(saved.seconds_left) or 0
 			local notExpired = saved.lifetime == true or (lastOk + secondsLeft) > os.time()
-			if (os.time() - lastOk) <= OFFLINE_GRACE_SECONDS and notExpired then
+			if (os.time() - lastOk) <= hubConfig.grace_seconds and notExpired then
 				setActiveSession(cleanSavedKey, saved)
 				setKeyVerified()
-				notify("Key server unreachable - using your key for up to 60 minutes.", "warn")
+				local mins = math.max(1, math.floor(hubConfig.grace_seconds / 60))
+				notify("Key server unreachable - using your key for up to " .. mins .. " minutes.", "warn")
 				loadScript()
 				return
 			end
@@ -504,7 +522,7 @@ if saved and type(saved.key) == "string" and saved.key ~= "" then
 		else
 			deleteSavedKey()
 			savedRejected = true
-			notify(hubErrorText(code), "error")
+			notify(errText or ("Key check failed. Get a new key at " .. hubConfig.site), "error")
 		end
 	else
 		deleteSavedKey()
@@ -580,14 +598,14 @@ end)
 
 KeyTab:Button("Get key (Copy link)", function()
 	copyKeyLink()
-	notify("Link copied: claim a free 4-hour key or buy lifetime at urbanstorm.uk")
+	notify("Link copied: claim a free 4-hour key or buy lifetime at " .. hubConfig.site)
 end)
 
 local HelpTab = win:Tab("Help")
 
 HelpTab:Button("Where do I get a key?", function()
 	copyKeyLink()
-	notify("Log in with Discord at urbanstorm.uk, complete the checkpoint, and paste your personal key here.")
+	notify("Log in with Discord at " .. hubConfig.site .. ", complete the checkpoint, and paste your personal key here.")
 end)
 
 HelpTab:Button("Why isn't my key working?", function()
@@ -600,7 +618,7 @@ end)
 
 HelpTab:Button("My key expired", function()
 	copyKeyLink()
-	notify("Free keys last 4 hours. Grab a new one at urbanstorm.uk")
+	notify("Free keys last 4 hours. Grab a new one at " .. hubConfig.site)
 end)
 
 HelpTab:Button("Join Discord for help", function()
@@ -615,6 +633,6 @@ Credits:Button("Made by Urbanstorm", function()
 	end)
 end)
 
-Credits:Button(discordUrl .. " - Click to copy", function()
+Credits:Button(hubConfig.discord .. " - Click to copy", function()
 	joinDiscord()
 end)
