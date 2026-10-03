@@ -232,33 +232,15 @@ local function getHwid()
 end
 
 local lastNetError = nil
+local lastHttpDetail = nil
 
-local function hubHttpGet(path)
-	local lastErr = nil
-	for _, base in ipairs(HUB_API_BASES) do
-		local ok, res = pcall(function()
-			return game:HttpGet(base .. path, true)
-		end)
-		if not ok then
-			lastErr = tostring(res)
-		elseif type(res) ~= "string" or res == "" then
-			lastErr = "empty response"
-		else
-			local okDecode, data = pcall(function()
-				return HttpService:JSONDecode(res)
-			end)
-			if okDecode and type(data) == "table" then
-				activeBase = base
-				return data, nil
-			end
-			lastErr = "bad response"
-		end
-	end
-	lastNetError = lastErr
-	return nil, "network"
+local function debugLog(message)
+	pcall(function()
+		warn("[Project Stark] " .. tostring(message))
+	end)
 end
 
-local function fetchRaw(path)
+local function baseOrder()
 	local bases = {}
 	if activeBase then
 		table.insert(bases, activeBase)
@@ -268,15 +250,91 @@ local function fetchRaw(path)
 			table.insert(bases, base)
 		end
 	end
-	for _, base in ipairs(bases) do
-		local ok, res = pcall(function()
-			return game:HttpGet(base .. path, true)
-		end)
-		if ok and type(res) == "string" and res ~= "" and res:sub(1, 1) ~= "{" then
+	return bases
+end
+
+-- Executor `request`/`http_request` first: it exposes status codes and works
+-- on executors where game:HttpGet misbehaves. Falls back to game:HttpGet.
+local function httpGetRaw(url)
+	local req = (syn and syn.request) or (http and http.request) or http_request or request
+	if type(req) == "function" then
+		local ok, res = pcall(req, {
+			Url = url,
+			Method = "GET",
+			Headers = {
+				["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+				["Accept"] = "application/json, text/plain, */*",
+			},
+		})
+		if ok and type(res) == "table" then
+			local body = res.Body or res.body
+			local status = res.StatusCode or res.Status or res.status
+			if type(body) == "string" and #body > 0 then
+				if type(status) == "number" and (status < 200 or status >= 300) then
+					lastHttpDetail = "request http " .. tostring(status)
+				else
+					lastHttpDetail = "request ok"
+				end
+				return body
+			end
+			lastHttpDetail = "request empty body"
+		else
+			lastHttpDetail = "request error: " .. tostring(res)
+		end
+	end
+	local ok, res = pcall(function()
+		return game:HttpGet(url, true)
+	end)
+	if ok and type(res) == "string" and #res > 0 then
+		lastHttpDetail = "HttpGet ok"
+		return res
+	end
+	local firstErr = res
+	ok, res = pcall(function()
+		return game:HttpGet(url)
+	end)
+	if ok and type(res) == "string" and #res > 0 then
+		lastHttpDetail = "HttpGet ok"
+		return res
+	end
+	lastHttpDetail = "HttpGet error: " .. tostring(firstErr or res)
+	return nil
+end
+
+local function hubHttpGet(path)
+	local lastErr = nil
+	for _, base in ipairs(baseOrder()) do
+		local res = httpGetRaw(base .. path)
+		if res then
+			local okDecode, data = pcall(function()
+				return HttpService:JSONDecode(res)
+			end)
+			if okDecode and type(data) == "table" then
+				activeBase = base
+				return data, nil
+			end
+			lastErr = lastHttpDetail or "bad response"
+		else
+			lastErr = lastHttpDetail or "no response"
+		end
+	end
+	lastNetError = lastErr
+	debugLog("api request failed: " .. tostring(path) .. " -> " .. tostring(lastErr))
+	return nil, "network"
+end
+
+local function fetchRaw(path)
+	for _, base in ipairs(baseOrder()) do
+		local res = httpGetRaw(base .. path)
+		if res and res ~= "" and res:sub(1, 1) ~= "{" then
 			activeBase = base
 			return res
 		end
+		if res and res:sub(1, 1) == "{" then
+			debugLog("script fetch got JSON error for " .. tostring(path) .. " via " .. base .. ": " .. res:sub(1, 160))
+		end
 	end
+	debugLog("script fetch failed: " .. tostring(path) .. " -> " .. tostring(lastHttpDetail))
 	return nil
 end
 
@@ -292,6 +350,7 @@ local function fetchHubConfig()
 	if type(data) ~= "table" or data.success ~= true then
 		return
 	end
+	debugLog("config ok via " .. tostring(activeBase))
 	if type(data.site) == "string" and #data.site > 0 then
 		hubConfig.site = data.site
 	end
@@ -580,6 +639,9 @@ if savedRejected then
 end
 
 local function loadUiLib()
+	if type(_G.ProjectStarkUILib) == "table" then
+		return _G.ProjectStarkUILib
+	end
 	if readfile then
 		for _, path in ipairs({
 			"Loadstring UI.lua",
@@ -610,13 +672,24 @@ local function loadUiLib()
 		if okRemote and remoteLib then
 			return remoteLib
 		end
+		debugLog("ui loadstring failed: " .. tostring(remoteLib))
+		local okLoad, loaded = pcall(function()
+			return (loadstring(source) or load(source))()
+		end)
+		if okLoad and loaded then
+			return loaded
+		end
+		debugLog("ui load failed: " .. tostring(loaded))
+	else
+		debugLog("ui fetch failed: " .. tostring(lastHttpDetail or lastNetError or "unknown"))
 	end
 	return _G.ProjectStarkUILib
 end
 
 local Lib = loadUiLib()
 if not Lib then
-	notify("Could not load the hub UI. Rejoin and try again.", "error")
+	notify("Could not load the hub UI. Rejoin and try again." .. netErrorSuffix(), "error")
+	debugLog("UI unavailable: http=" .. tostring(lastHttpDetail) .. " net=" .. tostring(lastNetError))
 	return
 end
 
