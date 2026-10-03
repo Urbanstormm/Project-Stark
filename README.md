@@ -1,3 +1,8 @@
-# Project-Stark
-Wow, you've landed at my github. Well since you're here you might aswell join my discord!
-https://discord.gg/FDG5V5AfFh
+# Project Stark
+
+This repository hosts the public Project Stark hub loader (`Main.lua`) only.
+
+Personal keys are claimed at **https://urbanstorm.uk/claim** (log in with Discord,
+complete the checkpoint) or issued in the Discord server.
+
+Join the Discord: https://discord.gg/FDG5V5AfFh
