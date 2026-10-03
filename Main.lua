@@ -33,12 +33,32 @@ local userInput = ""
 local activeKey = nil
 
 local function notify(text, kind)
+	-- Once the UI library is loaded, use its themed notification system.
+	local lib = rawget(_G, "ProjectStarkUILib")
+	if lib and type(lib.Notify) == "function" then
+		local titles = {
+			error = "Error",
+			success = "Success",
+			warn = "Notice",
+			info = "Project Stark",
+		}
+		pcall(function()
+			lib:Notify({
+				title = titles[kind] or "Project Stark",
+				content = tostring(text),
+				kind = kind or "info",
+				duration = 6,
+			})
+		end)
+		return
+	end
+	-- Pre-UI fallback (key server / UI load errors before the lib exists).
 	pcall(function()
 		local coreGui = game:GetService("CoreGui")
-		local gui = coreGui:FindFirstChild("ProjectStarkNotify")
+		local gui = coreGui:FindFirstChild("ProjectStarkToast")
 		if not gui then
 			gui = Instance.new("ScreenGui")
-			gui.Name = "ProjectStarkNotify"
+			gui.Name = "ProjectStarkToast"
 			gui.ResetOnSpawn = false
 			gui.IgnoreGuiInset = true
 			gui.DisplayOrder = 999999
