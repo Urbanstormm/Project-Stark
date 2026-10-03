@@ -264,28 +264,6 @@ local function copyDiscordLink()
 	end)
 end
 
-local function joinDiscord()
-	copyDiscordLink()
-	-- Resolve a fresh invite code so the Discord RPC path can join directly.
-	local ok, body = pcall(function()
-		return game:HttpGet(hubConfig.discord .. "?format=json", true)
-	end)
-	if ok and type(body) == "string" and body:sub(1, 1) == "{" then
-		local okDecode, data = pcall(function()
-			return HttpService:JSONDecode(body)
-		end)
-		if okDecode and type(data) == "table" and type(data.code) == "string" and #data.code > 0 then
-			Invdiscord(data.code)
-			return
-		end
-	end
-	pcall(function()
-		game:GetService("GuiService"):OpenBrowserWindow(hubConfig.discord)
-	end)
-end
-
-_G.ProjectStarkJoinDiscord = joinDiscord
-
 local function Invdiscord(code)
 	pcall(function()
 		local Request = (syn and syn.request) or request
@@ -482,6 +460,27 @@ local function fetchRaw(path)
 	debugLog("script fetch failed: " .. tostring(path) .. " -> " .. tostring(lastHttpDetail))
 	return nil
 end
+
+-- Resolve a fresh invite through the API so the Discord RPC path can join
+-- directly; falls back to opening the URL in a browser.
+local function joinDiscord()
+	copyDiscordLink()
+	local body = httpGetRaw(hubConfig.discord .. "?format=json")
+	if type(body) == "string" and body:sub(1, 1) == "{" then
+		local okDecode, data = pcall(function()
+			return HttpService:JSONDecode(body)
+		end)
+		if okDecode and type(data) == "table" and type(data.code) == "string" and #data.code > 0 then
+			Invdiscord(data.code)
+			return
+		end
+	end
+	pcall(function()
+		game:GetService("GuiService"):OpenBrowserWindow(hubConfig.discord)
+	end)
+end
+
+_G.ProjectStarkJoinDiscord = joinDiscord
 
 local function loadUiLib()
 	if type(_G.ProjectStarkUILib) == "table" then
@@ -712,6 +711,7 @@ local function loadScript()
 
 	if not loadScriptFromSource() then
 		notify("No script is available for this game yet.", "error")
+		joinDiscord()
 		task.delay(2, function()
 			kickPlayer("Project Stark: no script available for this game yet.")
 		end)
@@ -721,6 +721,9 @@ end
 local function handleWrongKey()
 	wrongAttempts = wrongAttempts + 1
 	copyKeyLink()
+	-- Old behaviour: a wrong key pops the Discord invite so users can grab a
+	-- key / ask for help (same never-breaking API link as the buttons).
+	joinDiscord()
 
 	if wrongAttempts >= hubConfig.max_attempts then
 		notify("Too many invalid attempts. Get a key at " .. hubConfig.site, "error")
