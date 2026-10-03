@@ -5,6 +5,7 @@
 
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
+local TweenService = game:GetService("TweenService")
 
 local KEY_VERIFIED_FLAG = "ProjectStarkKeyVerified"
 -- urbanstorm.uk/api/* is reverse-proxied to the origin by the site Worker,
@@ -33,6 +34,8 @@ local userInput = ""
 local activeKey = nil
 
 local toastGui = nil
+local toastList = nil
+local toastActive = {}
 
 local function randomGuiName()
 	local charset = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -44,19 +47,172 @@ local function randomGuiName()
 	return name
 end
 
+local function toastColor(kind)
+	if kind == "error" then
+		return Color3.fromRGB(220, 72, 82)
+	elseif kind == "success" then
+		return Color3.fromRGB(88, 200, 130)
+	elseif kind == "warn" then
+		return Color3.fromRGB(232, 172, 64)
+	end
+	return Color3.fromRGB(138, 80, 255)
+end
+
+-- Fallback notification with the exact UI-lib look. Only used when the lib
+-- itself could not load; otherwise Lib:Notify handles every message.
+local function showFallbackToast(title, content, kind)
+	local color = toastColor(kind)
+
+	if not (toastGui and toastGui.Parent) then
+		local parent = game:GetService("CoreGui")
+		if type(gethui) == "function" then
+			local ok, hidden = pcall(gethui)
+			if ok and hidden then
+				parent = hidden
+			end
+		end
+		toastGui = Instance.new("ScreenGui")
+		toastGui.Name = randomGuiName()
+		toastGui.ResetOnSpawn = false
+		toastGui.IgnoreGuiInset = true
+		toastGui.DisplayOrder = 999999
+		toastGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		toastGui.Parent = parent
+		toastList = Instance.new("UIListLayout")
+		toastList.FillDirection = Enum.FillDirection.Vertical
+		toastList.HorizontalAlignment = Enum.HorizontalAlignment.Right
+		toastList.VerticalAlignment = Enum.VerticalAlignment.Bottom
+		toastList.SortOrder = Enum.SortOrder.LayoutOrder
+		toastList.Padding = UDim.new(0, 8)
+		toastList.Parent = toastGui
+		local padding = Instance.new("UIPadding")
+		padding.PaddingRight = UDim.new(0, 18)
+		padding.PaddingBottom = UDim.new(0, 18)
+		padding.Parent = toastGui
+	end
+
+	local contentSize = game:GetService("TextService"):GetTextSize(content, 14, Enum.Font.Gotham, Vector2.new(308, 600))
+	local height = math.clamp(66 + contentSize.Y, 82, 190)
+
+	local holder = Instance.new("Frame")
+	holder.BackgroundTransparency = 1
+	holder.Size = UDim2.new(0, 340, 0, height)
+	holder.Parent = toastGui
+	table.insert(toastActive, holder)
+
+	local card = Instance.new("Frame")
+	card.BackgroundColor3 = Color3.fromRGB(27, 27, 27)
+	card.BorderSizePixel = 0
+	card.Size = UDim2.new(0, 340, 0, height)
+	card.Position = UDim2.new(0, 360, 0, 0)
+	card.ClipsDescendants = true
+	card.Parent = holder
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 9)
+	corner.Parent = card
+
+	local glow = Instance.new("ImageLabel")
+	glow.BackgroundTransparency = 1
+	glow.Position = UDim2.new(0, -15, 0, -15)
+	glow.Size = UDim2.new(1, 30, 1, 30)
+	glow.ZIndex = 0
+	glow.Image = "rbxassetid://4996891970"
+	glow.ImageColor3 = Color3.fromRGB(15, 15, 15)
+	glow.ScaleType = Enum.ScaleType.Slice
+	glow.SliceCenter = Rect.new(20, 20, 280, 280)
+	glow.Parent = card
+
+	local titleLabel = Instance.new("TextLabel")
+	titleLabel.BackgroundTransparency = 1
+	titleLabel.Position = UDim2.new(0, 16, 0, 12)
+	titleLabel.Size = UDim2.new(1, -32, 0, 20)
+	titleLabel.Font = Enum.Font.Gotham
+	titleLabel.TextSize = 15
+	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+	titleLabel.TextColor3 = color
+	titleLabel.Text = title
+	titleLabel.ZIndex = 2
+	titleLabel.Parent = card
+
+	local line = Instance.new("Frame")
+	line.BackgroundColor3 = color
+	line.BorderSizePixel = 0
+	line.Position = UDim2.new(0, 16, 0, 38)
+	line.Size = UDim2.new(1, -32, 0, 2)
+	line.ZIndex = 2
+	line.Parent = card
+	local lineCorner = Instance.new("UICorner")
+	lineCorner.CornerRadius = UDim.new(0, 9)
+	lineCorner.Parent = line
+
+	local body = Instance.new("TextLabel")
+	body.BackgroundTransparency = 1
+	body.Position = UDim2.new(0, 16, 0, 48)
+	body.Size = UDim2.new(1, -32, 1, -60)
+	body.Font = Enum.Font.Gotham
+	body.TextSize = 14
+	body.TextWrapped = true
+	body.TextXAlignment = Enum.TextXAlignment.Left
+	body.TextYAlignment = Enum.TextYAlignment.Top
+	body.TextColor3 = Color3.fromRGB(255, 255, 255)
+	body.Text = content
+	body.ZIndex = 2
+	body.Parent = card
+
+	TweenService:Create(
+		card,
+		TweenInfo.new(0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{ Position = UDim2.new(0, 0, 0, 0) }
+	):Play()
+
+	local dismissed = false
+	local function dismiss()
+		if dismissed then
+			return
+		end
+		dismissed = true
+		local tween = TweenService:Create(
+			card,
+			TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+			{ Position = UDim2.new(0, 360, 0, 0), BackgroundTransparency = 0.4 }
+		)
+		tween:Play()
+		tween.Completed:Connect(function()
+			pcall(function()
+				holder:Destroy()
+			end)
+			for index, item in ipairs(toastActive) do
+				if item == holder then
+					table.remove(toastActive, index)
+					break
+				end
+			end
+		end)
+	end
+
+	card.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dismiss()
+		end
+	end)
+	task.delay(7, dismiss)
+end
+
 local function notify(text, kind)
+	local titles = {
+		error = "Error",
+		success = "Success",
+		warn = "Notice",
+		info = "Project Stark",
+	}
+	local title = titles[kind] or "Project Stark"
 	-- Once the UI library is loaded, use its themed notification system.
 	local lib = rawget(_G, "ProjectStarkUILib")
 	if lib and type(lib.Notify) == "function" then
-		local titles = {
-			error = "Error",
-			success = "Success",
-			warn = "Notice",
-			info = "Project Stark",
-		}
 		pcall(function()
 			lib:Notify({
-				title = titles[kind] or "Project Stark",
+				title = title,
 				content = tostring(text),
 				kind = kind or "info",
 				duration = 6,
@@ -64,46 +220,9 @@ local function notify(text, kind)
 		end)
 		return
 	end
-	-- Pre-UI fallback (key server / UI load errors before the lib exists).
+	-- Lib unavailable: identical-looking fallback.
 	pcall(function()
-		if not (toastGui and toastGui.Parent) then
-			local parent = game:GetService("CoreGui")
-			if type(gethui) == "function" then
-				local ok, hidden = pcall(gethui)
-				if ok and hidden then
-					parent = hidden
-				end
-			end
-			toastGui = Instance.new("ScreenGui")
-			toastGui.Name = randomGuiName()
-			toastGui.ResetOnSpawn = false
-			toastGui.IgnoreGuiInset = true
-			toastGui.DisplayOrder = 999999
-			toastGui.Parent = parent
-		end
-		local label = Instance.new("TextLabel")
-		label.Size = UDim2.new(0, 440, 0, 48)
-		label.Position = UDim2.new(0.5, -220, 0, 24)
-		if kind == "error" then
-			label.BackgroundColor3 = Color3.fromRGB(122, 32, 44)
-		elseif kind == "success" then
-			label.BackgroundColor3 = Color3.fromRGB(44, 92, 62)
-		else
-			label.BackgroundColor3 = Color3.fromRGB(64, 46, 98)
-		end
-		label.BackgroundTransparency = 0.12
-		label.BorderSizePixel = 0
-		label.TextColor3 = Color3.fromRGB(255, 255, 255)
-		label.TextWrapped = true
-		label.Font = Enum.Font.GothamMedium
-		label.TextSize = 15
-		label.Text = tostring(text)
-		label.Parent = toastGui
-		task.delay(7, function()
-			pcall(function()
-				label:Destroy()
-			end)
-		end)
+		showFallbackToast(title, tostring(text), kind)
 	end)
 end
 
@@ -375,6 +494,54 @@ local function fetchRaw(path)
 	return nil
 end
 
+local function loadUiLib()
+	if type(_G.ProjectStarkUILib) == "table" then
+		return _G.ProjectStarkUILib
+	end
+	if readfile then
+		for _, path in ipairs({
+			"Loadstring UI.lua",
+			"New script hub/Loadstring UI.lua",
+			"UiLib.lua",
+			"New script hub/UiLib.lua",
+		}) do
+			local ok, source = pcall(readfile, path)
+			if ok and type(source) == "string" and source ~= "" then
+				local run = loadstring(source) or load(source)
+				if run then
+					local okRun, lib = pcall(run)
+					if okRun and lib then
+						return lib
+					end
+					return _G.ProjectStarkUILib
+				end
+			end
+		end
+	end
+	-- The UI library is public: it renders the key-entry window before the
+	-- user has a key. Game scripts stay key-gated.
+	local source = fetchRaw("/api/hub/script?id=ui")
+	if source then
+		local okRemote, remoteLib = pcall(function()
+			return loadstring(source)()
+		end)
+		if okRemote and remoteLib then
+			return remoteLib
+		end
+		debugLog("ui loadstring failed: " .. tostring(remoteLib))
+		local okLoad, loaded = pcall(function()
+			return (loadstring(source) or load(source))()
+		end)
+		if okLoad and loaded then
+			return loaded
+		end
+		debugLog("ui load failed: " .. tostring(loaded))
+	else
+		debugLog("ui fetch failed: " .. tostring(lastHttpDetail or lastNetError or "unknown"))
+	end
+	return _G.ProjectStarkUILib
+end
+
 local function netErrorSuffix()
 	if not lastNetError then
 		return ""
@@ -626,6 +793,11 @@ if skipKeyCheck then
 	return
 end
 
+-- UI library first: it powers notifications on every path, including the
+-- saved-key fast path that never opens the key window.
+local Lib = loadUiLib()
+debugLog("ui lib " .. (Lib and "loaded" or "unavailable"))
+
 -- Saved key: re-validate against the API. If the API is unreachable, allow a
 -- 60-minute grace window based on the last successful check.
 local saved = loadSavedKeyData()
@@ -675,55 +847,6 @@ if savedRejected then
 	copyKeyLink()
 end
 
-local function loadUiLib()
-	if type(_G.ProjectStarkUILib) == "table" then
-		return _G.ProjectStarkUILib
-	end
-	if readfile then
-		for _, path in ipairs({
-			"Loadstring UI.lua",
-			"New script hub/Loadstring UI.lua",
-			"UiLib.lua",
-			"New script hub/UiLib.lua",
-		}) do
-			local ok, source = pcall(readfile, path)
-			if ok and type(source) == "string" and source ~= "" then
-				local run = loadstring(source) or load(source)
-				if run then
-					local okRun, lib = pcall(run)
-					if okRun and lib then
-						return lib
-					end
-					return _G.ProjectStarkUILib
-				end
-			end
-		end
-	end
-	-- The UI library is public: it renders the key-entry window before the
-	-- user has a key. Game scripts stay key-gated.
-	local source = fetchRaw("/api/hub/script?id=ui")
-	if source then
-		local okRemote, remoteLib = pcall(function()
-			return loadstring(source)()
-		end)
-		if okRemote and remoteLib then
-			return remoteLib
-		end
-		debugLog("ui loadstring failed: " .. tostring(remoteLib))
-		local okLoad, loaded = pcall(function()
-			return (loadstring(source) or load(source))()
-		end)
-		if okLoad and loaded then
-			return loaded
-		end
-		debugLog("ui load failed: " .. tostring(loaded))
-	else
-		debugLog("ui fetch failed: " .. tostring(lastHttpDetail or lastNetError or "unknown"))
-	end
-	return _G.ProjectStarkUILib
-end
-
-local Lib = loadUiLib()
 if not Lib then
 	notify("Could not load the hub UI. Rejoin and try again." .. netErrorSuffix(), "error")
 	debugLog("UI unavailable: http=" .. tostring(lastHttpDetail) .. " net=" .. tostring(lastNetError))
