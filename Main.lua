@@ -92,7 +92,7 @@ local function showFallbackToast(title, content, kind)
 	end
 
 	local contentSize = game:GetService("TextService"):GetTextSize(content, 14, Enum.Font.Gotham, Vector2.new(308, 600))
-	local height = math.clamp(66 + contentSize.Y, 82, 190)
+	local height = math.clamp(62 + contentSize.Y, 80, 190)
 
 	local holder = Instance.new("Frame")
 	holder.BackgroundTransparency = 1
@@ -135,21 +135,10 @@ local function showFallbackToast(title, content, kind)
 	titleLabel.ZIndex = 2
 	titleLabel.Parent = card
 
-	local line = Instance.new("Frame")
-	line.BackgroundColor3 = color
-	line.BorderSizePixel = 0
-	line.Position = UDim2.new(0, 16, 0, 38)
-	line.Size = UDim2.new(1, -32, 0, 2)
-	line.ZIndex = 2
-	line.Parent = card
-	local lineCorner = Instance.new("UICorner")
-	lineCorner.CornerRadius = UDim.new(0, 9)
-	lineCorner.Parent = line
-
 	local body = Instance.new("TextLabel")
 	body.BackgroundTransparency = 1
-	body.Position = UDim2.new(0, 16, 0, 48)
-	body.Size = UDim2.new(1, -32, 1, -60)
+	body.Position = UDim2.new(0, 16, 0, 40)
+	body.Size = UDim2.new(1, -32, 1, -52)
 	body.Font = Enum.Font.Gotham
 	body.TextSize = 14
 	body.TextWrapped = true
