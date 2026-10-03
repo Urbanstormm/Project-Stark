@@ -231,12 +231,19 @@ local function getHwid()
 	return ""
 end
 
+local lastNetError = nil
+
 local function hubHttpGet(path)
+	local lastErr = nil
 	for _, base in ipairs(HUB_API_BASES) do
 		local ok, res = pcall(function()
 			return game:HttpGet(base .. path, true)
 		end)
-		if ok and type(res) == "string" and res ~= "" then
+		if not ok then
+			lastErr = tostring(res)
+		elseif type(res) ~= "string" or res == "" then
+			lastErr = "empty response"
+		else
 			local okDecode, data = pcall(function()
 				return HttpService:JSONDecode(res)
 			end)
@@ -244,9 +251,40 @@ local function hubHttpGet(path)
 				activeBase = base
 				return data, nil
 			end
+			lastErr = "bad response"
 		end
 	end
+	lastNetError = lastErr
 	return nil, "network"
+end
+
+local function fetchRaw(path)
+	local bases = {}
+	if activeBase then
+		table.insert(bases, activeBase)
+	end
+	for _, base in ipairs(HUB_API_BASES) do
+		if base ~= activeBase then
+			table.insert(bases, base)
+		end
+	end
+	for _, base in ipairs(bases) do
+		local ok, res = pcall(function()
+			return game:HttpGet(base .. path, true)
+		end)
+		if ok and type(res) == "string" and res ~= "" and res:sub(1, 1) ~= "{" then
+			activeBase = base
+			return res
+		end
+	end
+	return nil
+end
+
+local function netErrorSuffix()
+	if not lastNetError then
+		return ""
+	end
+	return " [" .. tostring(lastNetError):sub(1, 140) .. "]"
 end
 
 local function fetchHubConfig()
@@ -462,7 +500,7 @@ local function handleKeyValidation(rawInput)
 	end
 
 	if code == "network" then
-		notify("Could not reach the key server. Check your connection and try again.", "error")
+		notify("Could not reach the key server. Check your connection and try again." .. netErrorSuffix(), "error")
 		return false
 	end
 
@@ -518,7 +556,7 @@ if saved and type(saved.key) == "string" and saved.key ~= "" then
 				loadScript()
 				return
 			end
-			notify("Could not reach the key server. Check your connection and try again.", "error")
+			notify("Could not reach the key server. Check your connection and try again." .. netErrorSuffix(), "error")
 		else
 			deleteSavedKey()
 			savedRejected = true
@@ -562,16 +600,15 @@ local function loadUiLib()
 			end
 		end
 	end
-	local fetch = rawget(_G, "ProjectStarkHubFetchScript")
-	if type(fetch) == "function" then
-		local source = fetch("ui")
-		if source then
-			local okRemote, remoteLib = pcall(function()
-				return loadstring(source)()
-			end)
-			if okRemote and remoteLib then
-				return remoteLib
-			end
+	-- The UI library is public: it renders the key-entry window before the
+	-- user has a key. Game scripts stay key-gated.
+	local source = fetchRaw("/api/hub/script?id=ui")
+	if source then
+		local okRemote, remoteLib = pcall(function()
+			return loadstring(source)()
+		end)
+		if okRemote and remoteLib then
+			return remoteLib
 		end
 	end
 	return _G.ProjectStarkUILib
