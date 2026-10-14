@@ -65,7 +65,7 @@ local function prefetch(name, hash, field)
 	end
 	task.spawn(function()
 		for _, base in ipairs(bases) do
-			local res = fetch(base .. "/api/hub/a/" .. name .. "/" .. hash)
+			local res = fetch(base .. "/api/hub/a/" .. name .. "/" .. hash .. ".js")
 			if res and #res > 1000 then
 				_G.ProjectStarkPrefetch[field] = res
 				return
@@ -83,7 +83,7 @@ local source
 if type(loaderHash) == "string" and #loaderHash >= 8 then
 	for _, base in ipairs(bases) do
 		local ok, res = pcall(function()
-			return game:HttpGet(base .. "/api/hub/a/loader/" .. loaderHash, true)
+			return game:HttpGet(base .. "/api/hub/a/loader/" .. loaderHash .. ".js", true)
 		end)
 		if ok and type(res) == "string" and #res > 1000 then
 			source = res
